@@ -266,13 +266,17 @@ def predict_from_game(game_scores: dict, is_child: bool = False) -> dict:
         # Fluid Reasoning: neutral median imputation for Heart Isle
         pm = 8.0
     else:
-        # ── Adult mapping (unchanged) ────────────────────────────────────
-        dsc = float(np.clip(game_scores.get("cloudport_items_per_sec", 0.5) * 60, 10, 80))
+        # ── Adult mapping ─────────────────────────────────────────────────
+        # Processing Speed: map [0,10] game catches → DSC [20,80] (adult normative range)
+        dsc = float(np.clip(20 + (game_scores.get("cloudport_items_per_sec", 0.5) * 60), 20, 80))
         tm_a = float(game_scores.get("starbridge_A_time", 25))
         tm_b = float(game_scores.get("starbridge_B_time", 45))
-        fms = float(game_scores.get("echobay_max_span", 6))
+        # Short-term Memory: map span [0,5] → NCPT forward span [4,14] (adult norms)
+        raw_span = game_scores.get("echobay_max_span", 3)
+        fms = float(np.clip(4 + (raw_span / 5) * 10, 4, 14))
         rms = float(5 + game_scores.get("card_efficiency", 0.5) * 11)
-        pm = float(game_scores.get("heartisle_correct", 6))
+        # Fluid Reasoning: neutral median imputation until Heart Isle tracks scores
+        pm = float(game_scores.get("heartisle_correct", 11))
 
     gen = float(game_scores.get("gender", 0))
 
@@ -351,9 +355,12 @@ def frontend_stats_to_game_scores(stats: FrontendGameStats) -> tuple[dict, bool]
             "gender":            gender,
         }, True
 
-    # Adult mode — existing mapping
-    total_time_s = stats.cloudport_totalTime / 1000 if stats.cloudport_totalTime > 100 else stats.cloudport_totalTime
-    items_per_sec = stats.cloudport_catches / max(total_time_s, 1)
+    # Adult mode
+    # Processing Speed: game gives 0-10 catches; map to items_per_sec so that
+    # predict_from_game's formula (dsc = 20 + items_per_sec*60) yields [20,80].
+    # 10 catches → items_per_sec = 1.0 → dsc = 80; 5 catches → 0.5 → dsc = 50.
+    TARGET_CATCHES = 10
+    items_per_sec = float(np.clip(stats.cloudport_catches, 0, TARGET_CATCHES)) / TARGET_CATCHES
     star_total = stats.starBridge_totalTime / 1000 if stats.starBridge_totalTime > 100 else stats.starBridge_totalTime
     return {
         "cloudport_items_per_sec": items_per_sec,
@@ -361,7 +368,7 @@ def frontend_stats_to_game_scores(stats: FrontendGameStats) -> tuple[dict, bool]
         "starbridge_B_time":       star_total * 0.6,
         "echobay_max_span":        stats.echoBay_maxSequence,
         "card_efficiency":         stats.hiddenReef_efficiency,
-        "heartisle_correct":       6,  # Heart Isle doesn't track this yet
+        "heartisle_correct":       11,  # neutral median imputation — Heart Isle tracking pending
         "gender":                  gender,
     }, False
 

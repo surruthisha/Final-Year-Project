@@ -76,7 +76,7 @@ export function CognitiveReport() {
           starBridge_completed: state.stats.starBridge?.completed ?? false,
           hiddenReef_totalMoves: state.stats.hiddenReef?.totalMoves ?? 0,
           hiddenReef_totalPairs: state.stats.hiddenReef?.totalPairs ?? 8,
-          hiddenReef_efficiency: state.stats.hiddenReef?.efficiency ?? 50,
+          hiddenReef_efficiency: (state.stats.hiddenReef?.efficiency ?? 50) / 100,
           hiddenReef_roundsCompleted: state.stats.hiddenReef?.roundsCompleted ?? 0,
           echoBay_maxSequence: state.stats.echoBay?.maxSequence ?? 0,
           echoBay_totalRounds: state.stats.echoBay?.totalRounds ?? 0,
