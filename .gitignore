@@ -48,3 +48,6 @@ env/
 frontend/.env
 frontend/.env.local
 frontend/.env.production
+
+# ── Claude Code (private IDE config) ─────────────────────────────────────────
+.claude/
