@@ -242,29 +242,37 @@ def predict_from_game(game_scores: dict, is_child: bool = False) -> dict:
           Logie & Pearson (1997) — visual span mapping
     """
     if is_child:
-        # ── Pediatric Calibration Layer ─────────────────────────────────
-        # Processing Speed: 1.35× speed multiplier (Van der Elst 2012)
-        # Maps [0-10 catches] → NCPT digit-symbol [20-80]
+        # ── Pediatric Calibration Layer (ratio-scaling) ─────────────────
+        # Ratio scaling removes offset floors so weak children score low,
+        # restoring diagnostic sensitivity for At-Risk detection.
+
         catches = float(game_scores.get("cloudport_catches", 0))
-        dsc = 20 + ((catches / 10) * 1.35 * 44.4)
-        dsc = float(np.clip(dsc, 20, 80))
+        span    = float(game_scores.get("echobay_span",       0))
+        patterns = float(game_scores.get("card_patterns",     0))
+
+        # Processing Speed: ratio scale (Van der Elst 2012, 1.35× multiplier)
+        # 0 catches → ~0 (At-Risk); 10 catches → ~74 (High)
+        dsc = (catches / 10) * 1.35 * 55
+        dsc = float(np.clip(dsc, 5, 80))
 
         # Executive Switching: 0.49 calibration factor (Tombaugh 2004)
-        # Child mean ~65 s → adult mean ~32 s
         raw_time = float(game_scores.get("starbridge_time", 70))
         tm_b = float(np.clip(raw_time * 0.49, 15, 150))
         tm_a = tm_b * 0.5
 
-        # Forward Memory Span: maps [1-5 child span] → [4-14] (Gathercole 2004)
-        span = float(game_scores.get("echobay_span", 0))
-        fms = float(np.clip(4 + (span / 5) * 10, 4, 14))
+        # Forward Memory Span: ratio scale — child mean 5.1 → adult mean 10.5
+        # (adult/child ratio = 2.05; Gathercole 2004)
+        fms = span * 2.05
+        fms = float(np.clip(fms, 2, 16))
 
-        # Visual / Reverse Span: maps [1-5 patterns] → [5-16] (Logie & Pearson 1997)
-        patterns = float(game_scores.get("card_patterns", 0))
-        rms = float(np.clip(5 + (patterns / 5) * 11, 5, 16))
+        # Reverse Memory Span: ratio scale (Logie & Pearson 1997)
+        rms = patterns * 1.78
+        rms = float(np.clip(rms, 2, 16))
 
-        # Fluid Reasoning: neutral median imputation for Heart Isle
-        pm = 8.0
+        # Fluid Reasoning: dynamic imputation based on overall performance
+        # Low-performing children get a lower PM score to avoid false positives
+        avg_performance = (min(catches, 10) / 10 + min(span, 5) / 5 + min(patterns, 5) / 5) / 3
+        pm = 6.0 if avg_performance <= 0.4 else 8.1
     else:
         # ── Adult mapping ─────────────────────────────────────────────────
         # Processing Speed: map [0,10] game catches → DSC [20,80]
