@@ -1,0 +1,13 @@
+[phases.setup]
+nixPkgs = ["python311", "gcc", "zlib"]
+
+[phases.install]
+cmds = [
+    "pip install --upgrade pip",
+    "pip install torch==2.2.0 --index-url https://download.pytorch.org/whl/cpu",
+    "pip install torch_geometric",
+    "pip install -r backend/requirements.txt"
+]
+
+[start]
+cmd = "cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
