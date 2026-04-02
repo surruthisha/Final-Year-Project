@@ -267,15 +267,17 @@ def predict_from_game(game_scores: dict, is_child: bool = False) -> dict:
         pm = 8.0
     else:
         # ── Adult mapping ─────────────────────────────────────────────────
-        # Processing Speed: map [0,10] game catches → DSC [20,80] (adult normative range)
+        # Processing Speed: map [0,10] game catches → DSC [20,80]
         dsc = float(np.clip(20 + (game_scores.get("cloudport_items_per_sec", 0.5) * 60), 20, 80))
-        tm_a = float(game_scores.get("starbridge_A_time", 25))
-        tm_b = float(game_scores.get("starbridge_B_time", 45))
-        # Short-term Memory: map span [0,5] → NCPT forward span [4,14] (adult norms)
-        raw_span = game_scores.get("echobay_max_span", 3)
-        fms = float(np.clip(4 + (raw_span / 5) * 10, 4, 14))
-        rms = float(5 + game_scores.get("card_efficiency", 0.5) * 11)
-        # Fluid Reasoning: neutral median imputation until Heart Isle tracks scores
+        # Trail Making: pre-calibrated values arrive from frontend_stats_to_game_scores
+        tm_a = float(game_scores.get("starbridge_A_time", 19.8))   # default = adult norm
+        tm_b = float(game_scores.get("starbridge_B_time", 33.45))  # default = adult norm
+        # Short-term Memory: win condition (span=5) → adult mean (z=0); worse → negative z
+        raw_span = game_scores.get("echobay_max_span", 0)
+        fms = float(np.clip((raw_span / 5) * 10.55, 4, 14))
+        # Working Memory: 50% efficiency → z=0; range maps ±2 SD across 0-100%
+        rms = float(np.clip(9.05 + (game_scores.get("card_efficiency", 0.5) - 0.5) * 9.96, 4, 14))
+        # Fluid Reasoning: neutral imputation (model input only, not displayed)
         pm = float(game_scores.get("heartisle_correct", 11))
 
     gen = float(game_scores.get("gender", 0))
@@ -292,8 +294,8 @@ def predict_from_game(game_scores: dict, is_child: bool = False) -> dict:
 
     zscores = {}
     for feat, val in raw_features.items():
-        if feat == "gender":
-            continue
+        if feat in ("gender", "progressive_matrices"):
+            continue  # gender is not a domain; pm has no reliable game signal
         norm = NCPT_NORMS[feat]
         z = (val - norm["mean"]) / norm["std"]
         if "trail" in feat:
@@ -364,8 +366,9 @@ def frontend_stats_to_game_scores(stats: FrontendGameStats) -> tuple[dict, bool]
     star_total = stats.starBridge_totalTime / 1000 if stats.starBridge_totalTime > 100 else stats.starBridge_totalTime
     return {
         "cloudport_items_per_sec": items_per_sec,
-        "starbridge_A_time":       star_total * 0.4,
-        "starbridge_B_time":       star_total * 0.6,
+        # Calibrated multipliers: ~35s game completion → adult NCPT trail norms (A≈20s, B≈33s)
+        "starbridge_A_time":       star_total * 0.57,
+        "starbridge_B_time":       star_total * 0.95,
         "echobay_max_span":        stats.echoBay_maxSequence,
         "card_efficiency":         stats.hiddenReef_efficiency,
         "heartisle_correct":       11,  # neutral median imputation — Heart Isle tracking pending
