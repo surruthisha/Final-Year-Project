@@ -80,7 +80,7 @@ export function HeartIsle() {
           filter: phase === 'evolved' || phase === 'complete' ? 'brightness(1.2) saturate(1.3)' : 'none'
         }}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[hsla(209,50%,15%,0.3)] via-transparent to-transparent" />
 
       {/* Skip button */}
       <div className="relative z-20 flex justify-start p-4 pl-16">

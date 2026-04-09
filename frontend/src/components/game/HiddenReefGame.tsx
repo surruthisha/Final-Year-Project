@@ -412,7 +412,7 @@ export function HiddenReefGame() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center"
+            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center"
           >
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
@@ -615,7 +615,7 @@ export function HiddenReefGame() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center"
+            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center"
           >
             <div className="bg-card rounded-game p-8 text-center shadow-float">
               <h2 className="game-title text-3xl mb-6">PAUSED</h2>
@@ -636,7 +636,7 @@ export function HiddenReefGame() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center"
+            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center"
           >
             <motion.div
               initial={{ scale: 0 }}

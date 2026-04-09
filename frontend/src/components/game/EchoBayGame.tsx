@@ -249,7 +249,7 @@ export function EchoBayGame() {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${echoBayBg})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background/60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[hsla(209,50%,15%,0.1)] to-[hsla(209,50%,15%,0.3)]" />
 
       {/* HUD */}
       <div className="relative z-20 flex justify-between items-center p-4">
@@ -380,7 +380,7 @@ export function EchoBayGame() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center"
+            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center"
           >
             <div className="bg-card rounded-game p-8 text-center shadow-float">
               <h2 className="game-title text-3xl mb-6">PAUSED</h2>
@@ -402,7 +402,7 @@ export function EchoBayGame() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center"
+            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center"
           >
             <motion.div
               initial={{ scale: 0 }}
@@ -464,7 +464,7 @@ export function EchoBayGame() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center"
+            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center"
           >
             <div className="bg-card rounded-game p-8 text-center shadow-float">
               <h2 className="game-title text-3xl mb-4">Oops!</h2>

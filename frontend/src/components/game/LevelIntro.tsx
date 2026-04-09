@@ -62,7 +62,7 @@ export function LevelIntro() {
         style={{ backgroundImage: `url(${backgrounds[state.currentIsland]})` }}
       />
       <div className="absolute inset-0" style={{
-        background: 'linear-gradient(0deg, hsla(209,70%,12%,0.7) 0%, hsla(209,60%,20%,0.35) 40%, transparent 100%)',
+        background: 'linear-gradient(0deg, hsla(209,70%,12%,0.35) 0%, hsla(209,60%,20%,0.15) 40%, transparent 100%)',
       }} />
 
       {/* Header */}

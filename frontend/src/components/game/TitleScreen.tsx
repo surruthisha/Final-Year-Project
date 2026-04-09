@@ -17,7 +17,7 @@ export function TitleScreen() {
       
       {/* Overlay gradient */}
       <div className="absolute inset-0" style={{
-        background: 'linear-gradient(180deg, hsla(209,60%,18%,0.3) 0%, transparent 30%, transparent 60%, hsla(209,70%,12%,0.5) 100%)',
+        background: 'linear-gradient(180deg, hsla(209,60%,18%,0.15) 0%, transparent 30%, transparent 65%, hsla(209,70%,12%,0.25) 100%)',
       }} />
       
       {/* Floating clouds animation */}

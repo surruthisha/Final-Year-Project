@@ -69,7 +69,7 @@ export function WorldMap() {
         style={{ backgroundImage: `url(${floatingIslandsBg})` }}
       />
       <div className="absolute inset-0" style={{
-        background: 'linear-gradient(180deg, hsla(209,60%,18%,0.25) 0%, transparent 30%, transparent 65%, hsla(209,65%,15%,0.4) 100%)',
+        background: 'linear-gradient(180deg, hsla(209,60%,18%,0.1) 0%, transparent 30%, transparent 70%, hsla(209,65%,15%,0.15) 100%)',
       }} />
 
       {/* Header */}

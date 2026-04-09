@@ -205,7 +205,7 @@ export function CognitiveReport() {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${heartIsleBg})` }}
       />
-      <div className="absolute inset-0 bg-background/85" />
+      <div className="absolute inset-0" style={{ background: 'hsla(209, 50%, 15%, 0.6)' }} />
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center py-8 px-4">

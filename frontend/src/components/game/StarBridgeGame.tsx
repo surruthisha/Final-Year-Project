@@ -376,7 +376,7 @@ export function StarBridgeGame() {
       <AnimatePresence>
         {showRoundComplete && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center">
+            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center">
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}
               className="bg-card rounded-game p-8 md:p-10 text-center shadow-float max-w-sm mx-4">
               <motion.h2 className="game-title text-3xl mb-2" animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: 2, duration: 0.3 }}>
@@ -398,7 +398,7 @@ export function StarBridgeGame() {
       <AnimatePresence>
         {isPaused && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center">
+            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center">
             <div className="bg-card rounded-game p-8 text-center shadow-float">
               <h2 className="game-title text-3xl mb-6">PAUSED</h2>
               <button onClick={() => setIsPaused(false)}
@@ -414,7 +414,7 @@ export function StarBridgeGame() {
       <AnimatePresence>
         {showReward && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center">
+            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center">
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}
               className="bg-card rounded-game p-8 md:p-12 text-center shadow-float max-w-md mx-4">
               <motion.h2 className="game-title text-4xl mb-4" animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: 3, duration: 0.3 }}>
@@ -447,7 +447,7 @@ export function StarBridgeGame() {
       <AnimatePresence>
         {gameOver && !showReward && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 bg-background/80 flex items-center justify-center">
+            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center">
             <div className="bg-card rounded-game p-8 text-center shadow-float">
               <h2 className="game-title text-3xl mb-4">Too Many Errors!</h2>
               <p className="text-lg mb-6">Let's try again!</p>
