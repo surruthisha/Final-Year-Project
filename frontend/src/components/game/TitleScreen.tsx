@@ -62,15 +62,23 @@ export function TitleScreen() {
         </motion.div>
 
         {/* Tagline */}
-        <motion.p
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="text-lg md:text-xl mb-6 text-center font-display font-medium"
-          style={{ color: 'hsl(210 35% 90%)', textShadow: '0 2px 10px hsl(209 90% 15% / 0.5)' }}
+          className="mb-6 px-3 py-1 rounded-lg"
+          style={{
+            background: 'hsl(209 70% 18% / 0.18)',
+            border: '1px solid hsl(210 40% 60% / 0.1)',
+          }}
         >
-          A journey of discovery awaits you...
-        </motion.p>
+          <p
+            className="text-lg md:text-xl text-center font-display font-medium"
+            style={{ color: 'hsl(210 35% 92%)', textShadow: '0 1px 6px hsl(209 90% 15% / 0.4)' }}
+          >
+            A journey of discovery awaits you...
+          </p>
+        </motion.div>
 
         {/* Spacer to push button toward bottom-center */}
         <div className="flex-1" />
