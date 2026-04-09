@@ -260,20 +260,61 @@ export function StarBridgeGame() {
       <div className="relative z-10 w-full h-[calc(100vh-160px)]">
         {/* Connection lines */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none">
+          <defs>
+            <linearGradient id="bridgeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="hsl(210 80% 60%)" />
+              <stop offset="50%" stopColor="hsl(250 80% 70%)" />
+              <stop offset="100%" stopColor="hsl(210 80% 60%)" />
+            </linearGradient>
+            <filter id="bridgeGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
           {connections.map((nodeId, index) => {
             if (index === 0) return null;
             const prevNode = currentPuzzle.nodes.find(n => n.id === connections[index - 1]);
             const currNode = currentPuzzle.nodes.find(n => n.id === nodeId);
             if (!prevNode || !currNode) return null;
             return (
-              <motion.line
-                key={`${prevNode.id}-${currNode.id}`}
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                x1={`${prevNode.x}%`} y1={`${prevNode.y}%`}
-                x2={`${currNode.x}%`} y2={`${currNode.y}%`}
-                stroke="hsl(210 80% 60%)" strokeWidth="4" className="drop-shadow-lg"
-              />
+              <g key={`${prevNode.id}-${currNode.id}`}>
+                {/* Glow underlay */}
+                <motion.line
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 0.4 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  x1={`${prevNode.x}%`} y1={`${prevNode.y}%`}
+                  x2={`${currNode.x}%`} y2={`${currNode.y}%`}
+                  stroke="hsl(210 80% 60%)" strokeWidth="10"
+                  strokeLinecap="round"
+                  filter="url(#bridgeGlow)"
+                />
+                {/* Main dotted bridge line */}
+                <motion.line
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  x1={`${prevNode.x}%`} y1={`${prevNode.y}%`}
+                  x2={`${currNode.x}%`} y2={`${currNode.y}%`}
+                  stroke="url(#bridgeGradient)" strokeWidth="4"
+                  strokeDasharray="8,4"
+                  strokeLinecap="round"
+                />
+                {/* Bright center line */}
+                <motion.line
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: [0.6, 1, 0.6] }}
+                  transition={{ pathLength: { duration: 0.4, ease: "easeOut" }, opacity: { duration: 1.5, repeat: Infinity } }}
+                  x1={`${prevNode.x}%`} y1={`${prevNode.y}%`}
+                  x2={`${currNode.x}%`} y2={`${currNode.y}%`}
+                  stroke="hsl(0 0% 100%)" strokeWidth="1.5"
+                  strokeDasharray="8,4"
+                  strokeLinecap="round"
+                />
+              </g>
             );
           })}
         </svg>
@@ -284,21 +325,25 @@ export function StarBridgeGame() {
             {currentPuzzle.nodes.map((node, index) => {
               const isConnected = connections.includes(node.id);
               return (
-                <motion.button
+                <div
                   key={node.id}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: index * 0.05, type: "spring" }}
-                  onClick={() => handleNodeClick(node.id)}
                   style={{ position: 'absolute', left: `${node.x}%`, top: `${node.y}%` }}
-                  className={`transform -translate-x-1/2 -translate-y-1/2
-                    w-14 h-14 md:w-18 md:h-18 rounded-full flex items-center justify-center
-                    font-display font-bold text-xl md:text-2xl
-                    border-4 border-card/50 transition-all duration-300
-                    ${getNodeColor(node.id)} ${isConnected ? 'text-card' : 'text-foreground'}`}
+                  className="-translate-x-1/2 -translate-y-1/2"
                 >
-                  {node.value}
-                </motion.button>
+                  <motion.button
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: index * 0.05, type: "spring" }}
+                    onClick={() => handleNodeClick(node.id)}
+                    className={`
+                      w-14 h-14 md:w-18 md:h-18 rounded-full flex items-center justify-center
+                      font-display font-bold text-xl md:text-2xl
+                      border-4 border-card/50 transition-all duration-300
+                      ${getNodeColor(node.id)} ${isConnected ? 'text-card' : 'text-foreground'}`}
+                  >
+                    {node.value}
+                  </motion.button>
+                </div>
               );
             })}
           </motion.div>

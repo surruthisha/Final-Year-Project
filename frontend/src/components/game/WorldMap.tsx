@@ -14,17 +14,33 @@ import { SeedGem } from './SeedGem';
 
 const mindlingImages = { pip: pipImage, mira: miraImage, vee: veeImage, nuo: nuoImage };
 
+// Single source of truth for island positions (numeric for both CSS and SVG)
+const islandPos: Record<IslandType, { x: number; y: number }> = {
+  'cloudport': { x: 20, y: 18 },
+  'star-bridge': { x: 70, y: 22 },
+  'hidden-reef': { x: 50, y: 42 },
+  'echo-bay': { x: 25, y: 62 },
+  'heart-isle': { x: 70, y: 72 },
+};
+
+// Path connections between islands in order
+const PATH_CONNECTIONS: [IslandType, IslandType][] = [
+  ['cloudport', 'star-bridge'],
+  ['star-bridge', 'hidden-reef'],
+  ['hidden-reef', 'echo-bay'],
+  ['echo-bay', 'heart-isle'],
+];
+
+// Which seed unlocks the glow for each path segment (seed earned at the "from" island)
+const PATH_SEED: Record<string, 'spark' | 'logic' | 'harmony'> = {
+  'cloudport->star-bridge': 'spark',
+  'star-bridge->hidden-reef': 'logic',
+  'hidden-reef->echo-bay': 'harmony',
+};
+
 export function WorldMap() {
   const { state, dispatch, seedCount } = useGame();
   const { playClick, playSwoosh } = useSoundEffects();
-
-  const islandPositions: Record<IslandType, { x: string; y: string }> = {
-    'cloudport': { x: '20%', y: '18%' },
-    'star-bridge': { x: '70%', y: '22%' },
-    'hidden-reef': { x: '50%', y: '42%' },
-    'echo-bay': { x: '25%', y: '62%' },
-    'heart-isle': { x: '70%', y: '72%' },
-  };
 
   const handleIslandClick = (islandId: IslandType) => {
     if (!state.unlockedIslands.includes(islandId)) return;
@@ -97,47 +113,82 @@ export function WorldMap() {
               <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
               <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0.3" />
             </linearGradient>
+            <linearGradient id="lineGradientActive" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0.8" />
+            </linearGradient>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
           </defs>
-          {/* Cloudport to Star Bridge */}
-          <line x1="25%" y1="23%" x2="65%" y2="27%" 
-                stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="10,5" />
-          {/* Star Bridge to Hidden Reef */}
-          <line x1="65%" y1="27%" x2="50%" y2="42%" 
-                stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="10,5" />
-          {/* Hidden Reef to Echo Bay */}
-          <line x1="50%" y1="47%" x2="30%" y2="62%" 
-                stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="10,5" />
-          {/* Echo Bay to Heart Isle */}
-          <line x1="30%" y1="67%" x2="65%" y2="72%" 
-                stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="10,5" />
+
+          {/* Base dotted lines between islands */}
+          {PATH_CONNECTIONS.map(([from, to]) => (
+            <line
+              key={`${from}-${to}`}
+              x1={`${islandPos[from].x}%`} y1={`${islandPos[from].y}%`}
+              x2={`${islandPos[to].x}%`} y2={`${islandPos[to].y}%`}
+              stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="10,5"
+            />
+          ))}
+
+          {/* Animated glow lines for completed paths */}
+          {PATH_CONNECTIONS.map(([from, to], i) => {
+            const key = `${from}->${to}`;
+            const seed = PATH_SEED[key];
+            // Last path (echo-bay -> heart-isle) glows when all 3 seeds collected
+            const isActive = seed ? state.seeds[seed] : (state.seeds.spark && state.seeds.logic && state.seeds.harmony);
+            if (!isActive) return null;
+            return (
+              <motion.line
+                key={`glow-${from}-${to}`}
+                x1={`${islandPos[from].x}%`} y1={`${islandPos[from].y}%`}
+                x2={`${islandPos[to].x}%`} y2={`${islandPos[to].y}%`}
+                stroke="url(#lineGradientActive)" strokeWidth="4" strokeDasharray="10,5"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: [0.4, 1, 0.4] }}
+                transition={{
+                  pathLength: { duration: 1.5, ease: "easeInOut", delay: i * 0.3 },
+                  opacity: { duration: 2, repeat: Infinity },
+                }}
+                filter="url(#glow)"
+              />
+            );
+          })}
         </svg>
 
         {ISLANDS.map((island, index) => {
           const isUnlocked = state.unlockedIslands.includes(island.id);
           const isCompleted = island.seedType ? state.seeds[island.seedType] : false;
-          const pos = islandPositions[island.id];
+          const pos = islandPos[island.id];
 
           return (
-            <motion.div
+            <div
               key={island.id}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: index * 0.15, type: "spring" }}
-              style={{ left: pos.x, top: pos.y }}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2"
+              style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+              className="absolute -translate-x-1/2 -translate-y-10 md:-translate-y-14"
             >
-              <motion.button
-                onClick={() => handleIslandClick(island.id)}
-                disabled={!isUnlocked}
-                whileHover={isUnlocked ? { scale: 1.1, y: -5 } : {}}
-                whileTap={isUnlocked ? { scale: 0.95 } : {}}
-                animate={isUnlocked ? { y: [0, -5, 0] } : {}}
-                transition={{ duration: 3, repeat: Infinity }}
-                className={`
-                  relative flex flex-col items-center
-                  ${!isUnlocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
-                `}
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: index * 0.15, type: "spring" }}
               >
+                <motion.button
+                  onClick={() => handleIslandClick(island.id)}
+                  disabled={!isUnlocked}
+                  whileHover={isUnlocked ? { scale: 1.1, y: -5 } : {}}
+                  whileTap={isUnlocked ? { scale: 0.95 } : {}}
+                  animate={isUnlocked ? { y: [0, -5, 0] } : {}}
+                  transition={{ duration: 3, repeat: Infinity }}
+                  className={`
+                    relative flex flex-col items-center
+                    ${!isUnlocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
+                  `}
+                >
                 {/* Island shape */}
                 <div className={`
                   w-20 h-20 md:w-28 md:h-28 rounded-full 
@@ -169,8 +220,9 @@ export function WorldMap() {
                   {island.name}
                   {!isUnlocked && <span className="ml-1 text-xs">[Locked]</span>}
                 </div>
-              </motion.button>
-            </motion.div>
+                </motion.button>
+              </motion.div>
+            </div>
           );
         })}
 
