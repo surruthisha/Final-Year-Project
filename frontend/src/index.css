@@ -8,7 +8,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Quicksand:wght@300;400;500;600;700&display=swap');
 
 /* Mindscape of Mindlings - Vivid, Bouncy, Moshi Monsters meets Nintendo */
 
@@ -16,29 +16,29 @@
   :root {
     /* Core game palette */
     --background: 200 60% 94%;
-    --foreground: 240 30% 20%;
+    --foreground: 209 98% 21%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 30% 20%;
+    --card: 210 31% 76%;
+    --card-foreground: 209 98% 21%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 30% 20%;
+    --popover: 210 31% 76%;
+    --popover-foreground: 209 90% 25%;
 
     /* Primary - Warm golden yellow for CTAs */
     --primary: 45 95% 55%;
-    --primary-foreground: 30 80% 20%;
+    --primary-foreground: 209 98% 21%;
 
     /* Secondary - Soft teal/mint */
     --secondary: 170 50% 70%;
-    --secondary-foreground: 170 60% 20%;
+    --secondary-foreground: 209 80% 25%;
 
-    /* Muted - Soft lavender cloud */
-    --muted: 250 40% 92%;
-    --muted-foreground: 250 20% 50%;
+    /* Muted - Soft blue cloud */
+    --muted: 210 30% 88%;
+    --muted-foreground: 209 50% 40%;
 
     /* Accent - Playful coral/peach */
     --accent: 15 85% 70%;
-    --accent-foreground: 15 70% 20%;
+    --accent-foreground: 209 80% 25%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -54,7 +54,7 @@
     --sky-medium: 210 70% 75%;
     --sky-dark: 220 60% 65%;
     
-    --cloud-white: 200 30% 98%;
+    --cloud-white: 210 31% 82%;
     --cloud-shadow: 210 30% 88%;
     
     --island-green: 130 45% 55%;
@@ -142,18 +142,18 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Quicksand', sans-serif;
     font-weight: 600;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Fredoka', sans-serif;
+    font-family: 'Baloo 2', cursive;
   }
 }
 
 @layer utilities {
   .game-title {
-    font-family: 'Fredoka', sans-serif;
+    font-family: 'Baloo 2', cursive;
     font-weight: 700;
     letter-spacing: -0.02em;
     text-shadow: 
