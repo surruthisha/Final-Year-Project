@@ -28,17 +28,17 @@ function zToPercent(z: number): number {
 }
 
 function zLabel(z: number): { text: string; color: string } {
-  if (z >= 1.5)  return { text: 'Well above norm', color: 'text-emerald-400' };
-  if (z >= 0.5)  return { text: 'Above norm',      color: 'text-green-400' };
-  if (z >= -0.5) return { text: 'Within norm',     color: 'text-blue-400' };
-  if (z >= -1.5) return { text: 'Below norm',      color: 'text-amber-400' };
-  return            { text: 'Well below norm',  color: 'text-red-400' };
+  if (z >= 1.5)  return { text: 'Well above norm', color: 'text-emerald-700' };
+  if (z >= 0.5)  return { text: 'Above norm',      color: 'text-green-700' };
+  if (z >= -0.5) return { text: 'Within norm',     color: 'text-blue-700' };
+  if (z >= -1.5) return { text: 'Below norm',      color: 'text-amber-700' };
+  return            { text: 'Well below norm',  color: 'text-red-600' };
 }
 
 function riskBadge(risk: string) {
-  if (risk === 'Low') return { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/30' };
-  if (risk === 'Moderate') return { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/30' };
-  return { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30' };
+  if (risk === 'Low') return { bg: 'bg-emerald-600/20', text: 'text-emerald-800', border: 'border-emerald-600/40' };
+  if (risk === 'Moderate') return { bg: 'bg-amber-500/20', text: 'text-amber-800', border: 'border-amber-600/40' };
+  return { bg: 'bg-red-500/20', text: 'text-red-700', border: 'border-red-600/40' };
 }
 
 function barColor(z: number): string {
@@ -424,16 +424,16 @@ export function CognitiveReport() {
                     || cls === 'Below avg' && prediction.predicted_class === 2
                     || cls === 'At-risk' && prediction.predicted_class === 3;
                   const colors: Record<string, string> = {
-                    'High': 'border-emerald-500/50 bg-emerald-500/10',
-                    'Average': 'border-blue-500/50 bg-blue-500/10',
-                    'Below avg': 'border-amber-500/50 bg-amber-500/10',
-                    'At-risk': 'border-red-500/50 bg-red-500/10',
+                    'High': 'border-emerald-600/50 bg-emerald-600/15',
+                    'Average': 'border-blue-600/50 bg-blue-600/15',
+                    'Below avg': 'border-amber-600/50 bg-amber-500/15',
+                    'At-risk': 'border-red-600/50 bg-red-500/15',
                   };
                   const textColors: Record<string, string> = {
-                    'High': 'text-emerald-400',
-                    'Average': 'text-blue-400',
-                    'Below avg': 'text-amber-400',
-                    'At-risk': 'text-red-400',
+                    'High': 'text-emerald-800',
+                    'Average': 'text-blue-800',
+                    'Below avg': 'text-amber-800',
+                    'At-risk': 'text-red-700',
                   };
                   return (
                     <div
@@ -471,7 +471,7 @@ export function CognitiveReport() {
                   if (!meta) return null;
                   const Icon = meta.icon;
                   const flag = z >= -0.5 ? 'OK' : z >= -1.5 ? 'MONITOR' : 'CONCERN';
-                  const flagColor = flag === 'OK' ? 'text-emerald-400' : flag === 'MONITOR' ? 'text-amber-400' : 'text-red-400';
+                  const flagColor = flag === 'OK' ? 'text-emerald-700' : flag === 'MONITOR' ? 'text-amber-700' : 'text-red-600';
                   const insight = z >= 0.5
                     ? `Strong ${meta.label.toLowerCase()} skills. Above adult average.`
                     : z >= -0.5
