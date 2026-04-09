@@ -16,7 +16,9 @@ export function TitleScreen() {
       />
       
       {/* Overlay gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/50" />
+      <div className="absolute inset-0" style={{
+        background: 'linear-gradient(180deg, hsla(209,60%,18%,0.3) 0%, transparent 30%, transparent 60%, hsla(209,70%,12%,0.5) 100%)',
+      }} />
       
       {/* Floating clouds animation */}
       <motion.div
@@ -65,7 +67,7 @@ export function TitleScreen() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
           className="text-lg md:text-xl mb-6 text-center font-display font-medium"
-          style={{ color: 'hsl(0 0% 100% / 0.85)', textShadow: '0 2px 8px hsl(0 0% 0% / 0.3)' }}
+          style={{ color: 'hsl(210 35% 90%)', textShadow: '0 2px 10px hsl(209 90% 15% / 0.5)' }}
         >
           A journey of discovery awaits you...
         </motion.p>

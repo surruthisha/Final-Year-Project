@@ -68,7 +68,9 @@ export function WorldMap() {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${floatingIslandsBg})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-sky-light/30 via-transparent to-sky-medium/40" />
+      <div className="absolute inset-0" style={{
+        background: 'linear-gradient(180deg, hsla(209,60%,18%,0.25) 0%, transparent 30%, transparent 65%, hsla(209,65%,15%,0.4) 100%)',
+      }} />
 
       {/* Header */}
       <div className="relative z-10 flex items-center p-4 md:p-6">
@@ -78,7 +80,7 @@ export function WorldMap() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="game-title text-2xl md:text-4xl drop-shadow-lg"
-          style={{ color: 'hsl(0 0% 100%)', textShadow: '0 2px 12px hsl(220 60% 30% / 0.5)' }}
+          style={{ color: 'hsl(42 90% 72%)', textShadow: '0 2px 12px hsl(209 90% 15% / 0.6)' }}
         >
           WORLD MAP
         </motion.h1>
@@ -88,8 +90,9 @@ export function WorldMap() {
           <motion.div
             className="flex items-center gap-2 px-4 py-2 rounded-game shadow-soft"
             style={{
-              background: 'hsl(0 0% 100% / 0.9)',
+              background: 'hsl(210 31% 76% / 0.92)',
               backdropFilter: 'blur(8px)',
+              border: '1px solid hsl(210 30% 68% / 0.5)',
             }}
             animate={{ scale: seedCount > 0 ? [1, 1.1, 1] : 1 }}
           >
@@ -239,11 +242,11 @@ export function WorldMap() {
               className="relative flex flex-col items-center"
             >
               <div className="rounded-full p-1" style={{
-                background: 'linear-gradient(180deg, hsl(45 100% 70%) 0%, hsl(40 90% 55%) 100%)',
-                boxShadow: '0 4px 16px hsl(45 100% 50% / 0.4)',
+                background: 'linear-gradient(180deg, hsl(42 90% 68%) 0%, hsl(42 85% 52%) 100%)',
+                boxShadow: '0 4px 16px hsl(42 90% 50% / 0.45)',
               }}>
                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden flex items-center justify-center"
-                  style={{ background: 'linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(200 20% 96%) 100%)' }}
+                  style={{ background: 'linear-gradient(180deg, hsl(210 38% 88%) 0%, hsl(210 32% 80%) 100%)' }}
                 >
                   <img 
                     src={mindlingImages[state.selectedMindling.type]}

@@ -40,15 +40,15 @@ export function CharacterSelect() {
   return (
     <div className="min-h-screen w-full flex flex-col relative overflow-hidden"
       style={{
-        background: 'linear-gradient(180deg, hsl(200 80% 75%) 0%, hsl(200 70% 82%) 40%, hsl(200 60% 88%) 100%)',
+        background: 'linear-gradient(180deg, hsl(209 60% 30%) 0%, hsl(210 50% 48%) 35%, hsl(210 42% 65%) 70%, hsl(210 38% 78%) 100%)',
       }}
     >
       {/* Crystal/geometric background pattern */}
       <div className="absolute inset-0 pointer-events-none" style={{
         background: `
-          linear-gradient(120deg, transparent 30%, hsl(200 80% 90% / 0.4) 50%, transparent 70%),
-          linear-gradient(240deg, transparent 30%, hsl(200 80% 92% / 0.3) 50%, transparent 70%),
-          linear-gradient(60deg, transparent 40%, hsl(200 60% 95% / 0.2) 55%, transparent 65%)
+          linear-gradient(120deg, transparent 30%, hsl(210 55% 65% / 0.2) 50%, transparent 70%),
+          linear-gradient(240deg, transparent 30%, hsl(42 80% 70% / 0.06) 50%, transparent 70%),
+          linear-gradient(60deg, transparent 40%, hsl(210 45% 75% / 0.15) 55%, transparent 65%)
         `,
       }} />
 
@@ -60,8 +60,8 @@ export function CharacterSelect() {
           animate={{ y: 0, opacity: 1 }}
           className="game-title text-3xl md:text-5xl text-center mb-8"
           style={{
-            color: 'hsl(210 50% 25%)',
-            textShadow: '0 2px 4px hsl(200 60% 70% / 0.5)',
+            color: 'hsl(42 90% 72%)',
+            textShadow: '0 2px 12px hsl(209 90% 15% / 0.6), 0 0 25px hsl(42 80% 60% / 0.2)',
           }}
         >
           CHOOSE YOUR MINDLING!
@@ -91,24 +91,24 @@ export function CharacterSelect() {
                   className="relative w-28 h-28 md:w-36 md:h-36 rounded-full p-1"
                   style={{
                     background: isSelected
-                      ? 'linear-gradient(180deg, hsl(190 90% 70%) 0%, hsl(200 85% 60%) 100%)'
-                      : 'linear-gradient(180deg, hsl(200 50% 85%) 0%, hsl(200 40% 75%) 100%)',
+                      ? 'linear-gradient(180deg, hsl(42 88% 65%) 0%, hsl(42 85% 52%) 100%)'
+                      : 'linear-gradient(180deg, hsl(210 35% 78%) 0%, hsl(210 32% 68%) 100%)',
                     boxShadow: isSelected
-                      ? '0 0 20px hsl(190 80% 60% / 0.6), 0 0 40px hsl(190 80% 60% / 0.3), inset 0 1px 0 hsl(0 0% 100% / 0.4)'
-                      : '0 2px 12px hsl(200 50% 50% / 0.2), inset 0 1px 0 hsl(0 0% 100% / 0.3)',
+                      ? '0 0 20px hsl(42 90% 55% / 0.55), 0 0 40px hsl(42 90% 55% / 0.25), inset 0 1px 0 hsl(42 100% 85% / 0.5)'
+                      : '0 2px 12px hsl(209 55% 35% / 0.25), inset 0 1px 0 hsl(210 40% 88% / 0.4)',
                   }}
                 >
                   {/* Inner white circle */}
                   <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center"
                     style={{
-                      background: 'linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(200 20% 96%) 100%)',
+                      background: 'linear-gradient(180deg, hsl(210 38% 90%) 0%, hsl(210 32% 82%) 100%)',
                     }}
                   >
                     <motion.img
                       src={mindlingImages[type]}
                       alt={mindling.displayName}
                       className="w-[85%] h-[85%] object-contain"
-                      style={{ filter: 'drop-shadow(0 2px 6px hsl(200 60% 50% / 0.3))' }}
+                      style={{ filter: 'drop-shadow(0 2px 6px hsl(209 60% 35% / 0.35))' }}
                       animate={isSelected ? { y: [0, -4, 0] } : {}}
                       transition={{ duration: 1.2, repeat: Infinity }}
                     />
@@ -123,9 +123,9 @@ export function CharacterSelect() {
                         exit={{ scale: 0 }}
                         className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold"
                         style={{
-                          background: 'linear-gradient(180deg, hsl(45 90% 60%) 0%, hsl(40 85% 50%) 100%)',
-                          color: 'hsl(0 0% 100%)',
-                          boxShadow: '0 2px 6px hsl(45 90% 40% / 0.4)',
+                          background: 'linear-gradient(180deg, hsl(42 90% 62%) 0%, hsl(42 85% 48%) 100%)',
+                          color: 'hsl(209 90% 15%)',
+                          boxShadow: '0 2px 6px hsl(42 90% 40% / 0.45)',
                         }}
                       >
                         ✓
@@ -138,14 +138,15 @@ export function CharacterSelect() {
                 <motion.div
                   className="mt-3 px-4 py-1 rounded-lg font-display text-lg font-bold"
                   style={{
-                    color: isSelected ? 'hsl(200 80% 35%)' : 'hsl(210 30% 35%)',
+                    color: isSelected ? 'hsl(42 90% 75%)' : 'hsl(210 35% 88%)',
+                    textShadow: '0 1px 4px hsl(209 80% 12% / 0.5)',
                   }}
                 >
                   {mindling.displayName}
                 </motion.div>
 
                 {/* Trait */}
-                <span className="text-sm font-medium" style={{ color: 'hsl(210 20% 50%)' }}>
+                <span className="text-sm font-medium" style={{ color: 'hsl(210 30% 78%)' }}>
                   {mindling.trait}
                 </span>
               </motion.div>
@@ -168,9 +169,9 @@ export function CharacterSelect() {
             maxLength={20}
             className="text-center text-xl py-6 rounded-full font-display border-0"
             style={{
-              background: 'hsl(0 0% 100% / 0.8)',
-              boxShadow: 'inset 0 2px 6px hsl(200 40% 70% / 0.3), 0 1px 0 hsl(0 0% 100% / 0.5)',
-              color: 'hsl(210 30% 30%)',
+              background: 'hsl(210 35% 84% / 0.9)',
+              boxShadow: 'inset 0 2px 6px hsl(209 50% 40% / 0.2), 0 1px 0 hsl(210 40% 90% / 0.4)',
+              color: 'hsl(209 90% 18%)',
             }}
           />
         </motion.div>
@@ -184,13 +185,13 @@ export function CharacterSelect() {
               exit={{ opacity: 0, x: 50 }}
               className="fixed bottom-24 right-4 md:right-8 rounded-2xl px-4 py-2 max-w-[200px]"
               style={{
-                background: 'hsl(0 0% 100% / 0.9)',
-                boxShadow: '0 4px 16px hsl(200 50% 40% / 0.15)',
+                background: 'hsl(210 32% 78% / 0.95)',
+                boxShadow: '0 4px 16px hsl(209 60% 25% / 0.2)',
               }}
             >
-              <p className="text-sm font-medium" style={{ color: 'hsl(210 30% 30%)' }}>Pick one!</p>
+              <p className="text-sm font-medium" style={{ color: 'hsl(209 90% 18%)' }}>Pick one!</p>
               <div className="absolute -left-2 top-1/2 w-4 h-4 transform -translate-y-1/2 rotate-45"
-                style={{ background: 'hsl(0 0% 100% / 0.9)' }}
+                style={{ background: 'hsl(210 32% 78% / 0.95)' }}
               />
             </motion.div>
           )}
@@ -208,12 +209,12 @@ export function CharacterSelect() {
           className="mb-8 px-12 py-4 text-xl font-display font-bold rounded-2xl transition-all duration-300"
           style={{
             background: selectedType && name.trim()
-              ? 'linear-gradient(180deg, hsl(260 40% 60%) 0%, hsl(260 35% 48%) 100%)'
-              : 'hsl(200 20% 75%)',
-            color: selectedType && name.trim() ? 'hsl(0 0% 100%)' : 'hsl(200 20% 50%)',
+              ? 'linear-gradient(180deg, hsl(42 90% 62%) 0%, hsl(38 85% 48%) 100%)'
+              : 'hsl(210 25% 68%)',
+            color: selectedType && name.trim() ? 'hsl(209 90% 15%)' : 'hsl(210 20% 45%)',
             boxShadow: selectedType && name.trim()
-              ? '0 4px 16px hsl(260 40% 40% / 0.4), inset 0 1px 0 hsl(260 50% 75% / 0.3)'
-              : '0 2px 8px hsl(200 30% 60% / 0.2)',
+              ? '0 4px 16px hsl(42 90% 40% / 0.45), inset 0 1px 0 hsl(42 100% 80% / 0.4)'
+              : '0 2px 8px hsl(209 40% 40% / 0.2)',
             cursor: selectedType && name.trim() ? 'pointer' : 'not-allowed',
           }}
         >

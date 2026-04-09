@@ -61,7 +61,9 @@ export function LevelIntro() {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${backgrounds[state.currentIsland]})` }}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/40 to-transparent" />
+      <div className="absolute inset-0" style={{
+        background: 'linear-gradient(0deg, hsla(209,70%,12%,0.7) 0%, hsla(209,60%,20%,0.35) 40%, transparent 100%)',
+      }} />
 
       {/* Header */}
       <div className="relative z-10 flex items-center p-4">
@@ -76,7 +78,7 @@ export function LevelIntro() {
 
         <h1
           className="game-title text-xl md:text-3xl drop-shadow-lg"
-          style={{ color: 'hsl(0 0% 100%)', textShadow: '0 2px 12px hsl(220 60% 30% / 0.5)' }}
+          style={{ color: 'hsl(42 90% 72%)', textShadow: '0 2px 12px hsl(209 90% 15% / 0.6)' }}
         >
           LEVEL {getLevelNumber()}
         </h1>
