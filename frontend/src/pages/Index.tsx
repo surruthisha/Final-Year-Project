@@ -14,6 +14,23 @@ import veeImage from '@/assets/mindling-vee.png';
 import nuoImage from '@/assets/mindling-nuo.png';
 import fireflyImage from '@/assets/firefly.png';
 
+// Game-level backgrounds — imported here so Vite bundles their hashed URLs
+// and we can preload them in the background immediately after boot.
+import worldMapBg    from '@/assets/world map.png';
+import level1Bg      from '@/assets/level1.png';
+import starBridgeBg  from '@/assets/star-bridge-bg.jpg';
+import hiddenReefBg  from '@/assets/hidden-reef-bg.jpg';
+import echoBayBg     from '@/assets/echo-bay-bg.jpg';
+import heartIsleBg   from '@/assets/heart-isle-bg.jpg';
+
+/** Fire-and-forget: kick off browser fetch for each URL so it lands in the
+ *  HTTP cache before the user navigates to that screen. */
+function preloadGameBackgrounds() {
+  [worldMapBg, level1Bg, starBridgeBg, hiddenReefBg, echoBayBg, heartIsleBg].forEach(
+    (src) => { const img = new Image(); img.src = src; },
+  );
+}
+
 /** Preload an image and resolve when it's decoded (or reject on error). */
 function preloadImage(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -60,6 +77,9 @@ function GameApp() {
     await new Promise((r) => setTimeout(r, 120));
     setReady(true);
     dismissHtmlLoader();
+    // Non-blocking: start fetching game backgrounds into the browser cache
+    // while the user is on the title screen so they're ready when needed.
+    preloadGameBackgrounds();
   }, []);
 
   useEffect(() => {

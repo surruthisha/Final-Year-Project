@@ -7,6 +7,7 @@ import { SeedGem } from './SeedGem';
 import { GlassCard, GlassButton } from '@/components/ui/glass';
 
 import heartIsleBg from '@/assets/heart-isle-bg.jpg';
+import { SceneBg } from './SceneBg';
 import pipImage from '@/assets/mindling-pip.png';
 import miraImage from '@/assets/mindling-mira.png';
 import veeImage from '@/assets/mindling-vee.png';
@@ -136,11 +137,9 @@ export function HeartIsle() {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       {/* Background */}
-      <img
+      <SceneBg
         src={heartIsleBg}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none transition-all duration-1000"
+        className="transition-all duration-1000"
         style={{
           filter:
             phase === 'evolved' || phase === 'complete'

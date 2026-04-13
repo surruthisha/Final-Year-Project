@@ -5,6 +5,7 @@ import { IslandType, ISLANDS } from '@/types/game';
 import { Lock, Sparkles } from 'lucide-react';
 import { GlassCard, GlassButton } from '@/components/ui/glass';
 import { SeedGem } from './SeedGem';
+import { SceneBg } from './SceneBg';
 
 import worldMapPng from '@/assets/world map.png';
 import pipImage from '@/assets/mindling-pip.png';
@@ -62,12 +63,7 @@ export function WorldMap() {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       {/* ── World map background ───────────────────────────── */}
-      <img
-        src={worldMapPng}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
-      />
+      <SceneBg src={worldMapPng} />
 
       {/* Soft vignette overlay for depth */}
       <div

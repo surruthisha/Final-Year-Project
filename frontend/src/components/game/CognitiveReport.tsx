@@ -14,6 +14,10 @@ import {
   ShieldCheck,
   ShieldAlert,
   Download,
+  Cpu,
+  Layers,
+  Users,
+  BarChart2,
 } from 'lucide-react';
 import { SeedGem } from './SeedGem';
 import { GlassCard, GlassButton } from '@/components/ui/glass';
@@ -306,8 +310,8 @@ export function CognitiveReport() {
               Cognitive Journey Report
             </h1>
             <p
-              className="font-body text-xs ink-soft"
-              style={{ textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}
+              className="font-body text-xs font-semibold ink-deep"
+              style={{ textShadow: '0 1px 0 rgba(255,255,255,0.4)' }}
             >
               Analytics Powered By: GENIE.AI + XAI
             </p>
@@ -457,8 +461,8 @@ export function CognitiveReport() {
                   </div>
 
                   <p
-                    className="text-center font-display font-bold text-sm ink-soft mt-3"
-                    style={{ textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}
+                    className="text-center font-display font-bold text-sm ink-deep mt-3"
+                    style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5), 0 2px 6px rgba(0,0,0,0.15)' }}
                   >
                     {state.mindlingName}'s Garden — Journey Complete
                   </p>
@@ -479,7 +483,10 @@ export function CognitiveReport() {
                           <p className="font-display font-bold text-base ink-deep">
                             {prediction.performance_label}
                           </p>
-                          <p className="text-xs ink-soft">
+                          <p
+                            className="text-xs font-display font-semibold ink-deep"
+                            style={{ textShadow: '0 1px 0 rgba(255,255,255,0.4)' }}
+                          >
                             Risk: {prediction.risk_band} | Confidence:{' '}
                             {(prediction.confidence * 100).toFixed(1)}%
                           </p>
@@ -487,11 +494,14 @@ export function CognitiveReport() {
                       </div>
                       <p
                         className="text-sm ink-deep leading-relaxed mt-2"
-                        style={{ textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}
+                        style={{ textShadow: '0 1px 0 rgba(255,255,255,0.4)', fontWeight: 600 }}
                       >
                         {prediction.recommendation}
                       </p>
-                      <p className="text-xs ink-soft mt-2">
+                      <p
+                        className="text-xs font-display font-semibold ink-deep mt-2"
+                        style={{ textShadow: '0 1px 0 rgba(255,255,255,0.4)' }}
+                      >
                         Mean z-score: {prediction.mean_z_score >= 0 ? '+' : ''}
                         {prediction.mean_z_score.toFixed(2)} vs adult norm
                       </p>
@@ -513,8 +523,8 @@ export function CognitiveReport() {
                   style={{ boxShadow: 'var(--glass-glow-sky)' }}
                 >
                   <h2
-                    className="font-display font-bold text-lg ink-deep mb-4"
-                    style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
+                    className="font-display font-bold text-xl ink-deep mb-5"
+                    style={{ textShadow: '0 2px 0 rgba(255,255,255,0.6), 0 4px 12px rgba(0,0,0,0.15)' }}
                   >
                     Cognitive Domain Scores
                   </h2>
@@ -526,27 +536,29 @@ export function CognitiveReport() {
                     const label = zLabel(z);
                     return (
                       <div key={key} className="mb-5">
-                        <div className="flex justify-between items-center mb-1.5">
+                        <div className="flex justify-between items-center mb-2">
                           <div className="flex items-center gap-2">
                             <Icon
-                              className="w-4 h-4"
-                              style={{ color: meta.color }}
+                              className="w-4.5 h-4.5"
+                              style={{ color: meta.color, filter: `drop-shadow(0 0 4px ${meta.color}80)` }}
                             />
                             <span
-                              className="font-display font-bold text-sm ink-deep"
+                              className="font-display font-bold text-base ink-deep"
                               style={{
-                                textShadow: '0 1px 0 rgba(255,255,255,0.4)',
+                                textShadow: '0 1px 0 rgba(255,255,255,0.5), 0 2px 6px rgba(0,0,0,0.2)',
                               }}
                             >
                               {meta.label}
                             </span>
                           </div>
                           <span
-                            className="text-xs font-display font-bold px-2 py-0.5 rounded-full"
+                            className="text-xs font-display font-bold px-2.5 py-1 rounded-full"
                             style={{
-                              background: 'rgba(255,255,255,0.15)',
-                              border: '1px solid rgba(255,255,255,0.25)',
+                              background: 'rgba(255,255,255,0.28)',
+                              border: `1.5px solid ${meta.color}`,
                               color: meta.color,
+                              textShadow: '0 1px 0 rgba(255,255,255,0.4)',
+                              filter: `drop-shadow(0 1px 3px ${meta.color}50)`,
                             }}
                           >
                             {label.text}
@@ -554,10 +566,11 @@ export function CognitiveReport() {
                         </div>
                         {/* Bar */}
                         <div
-                          className="h-3.5 rounded-full overflow-hidden relative"
+                          className="h-4 rounded-full overflow-hidden relative"
                           style={{
-                            background: 'rgba(255,255,255,0.15)',
-                            border: '1px solid rgba(255,255,255,0.25)',
+                            background: 'rgba(255,255,255,0.2)',
+                            border: '1.5px solid rgba(255,255,255,0.35)',
+                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.15)',
                           }}
                         >
                           <motion.div
@@ -567,30 +580,38 @@ export function CognitiveReport() {
                             className="h-full rounded-full"
                             style={{
                               background: barGradient(z),
-                              boxShadow: `0 0 8px hsla(${meta.hue},60%,50%,0.4)`,
+                              boxShadow: `0 0 10px hsla(${meta.hue},70%,55%,0.6)`,
                             }}
                           />
                           {/* Center line (adult average) */}
                           <div
-                            className="absolute top-0 bottom-0 w-px"
+                            className="absolute top-0 bottom-0 w-0.5"
                             style={{
                               left: '50%',
-                              background: 'rgba(255,255,255,0.4)',
+                              background: 'rgba(255,255,255,0.65)',
+                              boxShadow: '0 0 3px rgba(255,255,255,0.8)',
                             }}
                           />
                         </div>
-                        <p className="text-xs ink-soft mt-1">
-                          z = {z >= 0 ? '+' : ''}
-                          {z.toFixed(2)}
+                        <p
+                          className="text-xs font-display font-semibold mt-1.5"
+                          style={{
+                            color: meta.color,
+                            textShadow: '0 1px 0 rgba(255,255,255,0.4)',
+                          }}
+                        >
+                          z-score: {z >= 0 ? '+' : ''}{z.toFixed(2)}
                         </p>
                       </div>
                     );
                   })}
 
                   <p
-                    className="text-xs ink-soft mt-2 pt-3"
+                    className="text-xs font-display font-semibold mt-2 pt-3"
                     style={{
-                      borderTop: '1px solid rgba(255,255,255,0.2)',
+                      borderTop: '1.5px solid rgba(255,255,255,0.3)',
+                      color: 'rgba(30,30,60,0.75)',
+                      textShadow: '0 1px 0 rgba(255,255,255,0.5)',
                     }}
                   >
                     Center line = adult average (z=0). Right = stronger performance.
@@ -698,29 +719,31 @@ export function CognitiveReport() {
                           <div className="flex items-center gap-2">
                             <Icon
                               className="w-4 h-4"
-                              style={{ color: meta.color }}
+                              style={{ color: meta.color, filter: `drop-shadow(0 0 3px ${meta.color}70)` }}
                             />
                             <span
-                              className="font-display font-bold text-xs"
-                              style={{ color: meta.color }}
+                              className="font-display font-bold text-sm ink-deep"
+                              style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
                             >
                               {meta.label}
                             </span>
                           </div>
                           <span
-                            className="text-xs font-display font-bold px-1.5 py-0.5 rounded"
+                            className="text-xs font-display font-bold px-2 py-0.5 rounded"
                             style={{
-                              background: 'rgba(255,255,255,0.2)',
-                              border: '1px solid rgba(255,255,255,0.3)',
+                              background: 'rgba(255,255,255,0.25)',
+                              border: '1.5px solid rgba(255,255,255,0.4)',
+                              color: 'rgba(30,30,60,0.85)',
+                              textShadow: '0 1px 0 rgba(255,255,255,0.5)',
                             }}
                           >
                             {flag}
                           </span>
                         </div>
                         <p
-                          className="text-sm ink-deep leading-relaxed"
+                          className="text-sm font-semibold ink-deep leading-relaxed"
                           style={{
-                            textShadow: '0 1px 0 rgba(255,255,255,0.3)',
+                            textShadow: '0 1px 0 rgba(255,255,255,0.4)',
                           }}
                         >
                           {insight}
@@ -728,6 +751,246 @@ export function CognitiveReport() {
                       </GlassCard>
                     );
                   })}
+                </div>
+              </GlassCard>
+            </motion.div>
+            {/* ── Model Architecture + Calibration ── */}
+            <motion.div
+              initial={{ y: 30 }}
+              animate={{ y: 0 }}
+              transition={{ delay: 0.5, type: 'spring', stiffness: 180, damping: 20 }}
+              className="w-full max-w-4xl mt-6"
+            >
+              <GlassCard
+                tint="bubble"
+                shimmer
+                className="p-6"
+                style={{ boxShadow: 'var(--glass-glow-lilac)' }}
+              >
+                {/* ── Model Architecture Info ── */}
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Cpu
+                      className="w-5 h-5"
+                      style={{ color: 'hsl(280,60%,60%)', filter: 'drop-shadow(0 0 4px hsl(280,60%,60%,0.5))' }}
+                    />
+                    <h2
+                      className="font-display font-bold text-xl ink-deep"
+                      style={{ textShadow: '0 2px 0 rgba(255,255,255,0.6), 0 4px 12px rgba(0,0,0,0.1)' }}
+                    >
+                      Model Architecture Info
+                    </h2>
+                  </div>
+
+                  {/* 3 component cards */}
+                  <div className="grid md:grid-cols-3 gap-3 mb-4">
+                    {/* GATv2 */}
+                    <GlassCard tint="lilac" className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Layers className="w-4 h-4" style={{ color: 'hsl(280,60%,55%)' }} />
+                        <span
+                          className="font-display font-bold text-sm ink-deep"
+                          style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
+                        >
+                          GATv2
+                        </span>
+                      </div>
+                      <p
+                        className="text-xs font-display font-semibold ink-deep mb-2"
+                        style={{ textShadow: '0 1px 0 rgba(255,255,255,0.4)' }}
+                      >
+                        Graph Attention Network
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {['3 Layers', '4 Heads', 'Residual'].map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-xs font-display font-bold px-2 py-0.5 rounded-full ink-deep"
+                            style={{
+                              background: 'rgba(255,255,255,0.28)',
+                              border: '1px solid rgba(255,255,255,0.45)',
+                              textShadow: '0 1px 0 rgba(255,255,255,0.4)',
+                            }}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </GlassCard>
+
+                    {/* LightGBM */}
+                    <GlassCard tint="sky" className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Zap className="w-4 h-4" style={{ color: 'hsl(200,80%,55%)' }} />
+                        <span
+                          className="font-display font-bold text-sm ink-deep"
+                          style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
+                        >
+                          LightGBM
+                        </span>
+                      </div>
+                      <p
+                        className="text-xs font-display font-semibold ink-deep mb-1"
+                        style={{ textShadow: '0 1px 0 rgba(255,255,255,0.4)' }}
+                      >
+                        Gradient Boosting
+                      </p>
+                      <p
+                        className="text-xs ink-deep"
+                        style={{ textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}
+                      >
+                        Fast, high-accuracy decision tree ensemble
+                      </p>
+                    </GlassCard>
+
+                    {/* Meta-Learner */}
+                    <GlassCard tint="mint" className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Brain className="w-4 h-4" style={{ color: 'hsl(160,65%,45%)' }} />
+                        <span
+                          className="font-display font-bold text-sm ink-deep"
+                          style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
+                        >
+                          Meta-Learner
+                        </span>
+                      </div>
+                      <p
+                        className="text-xs font-display font-semibold ink-deep mb-1"
+                        style={{ textShadow: '0 1px 0 rgba(255,255,255,0.4)' }}
+                      >
+                        Logistic Stacking
+                      </p>
+                      <p
+                        className="text-xs ink-deep"
+                        style={{ textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}
+                      >
+                        Combines GATv2 + LightGBM predictions
+                      </p>
+                    </GlassCard>
+                  </div>
+
+                  {/* Performance metrics row */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { label: 'F1 Score', value: '0.8612', color: 'hsl(160,65%,45%)' },
+                      { label: 'AUC-ROC', value: '0.9749', color: 'hsl(200,80%,55%)' },
+                      { label: 'Ensemble', value: 'v1.0', sub: 'NCPT Model', color: 'hsl(280,60%,60%)' },
+                    ].map(({ label, value, sub, color }) => (
+                      <div
+                        key={label}
+                        className="text-center py-3 px-2 rounded-2xl"
+                        style={{
+                          background: 'rgba(255,255,255,0.2)',
+                          border: `1.5px solid ${color}50`,
+                          boxShadow: `0 2px 8px ${color}20`,
+                        }}
+                      >
+                        <p
+                          className="text-2xl font-display font-bold"
+                          style={{ color, textShadow: `0 2px 0 rgba(255,255,255,0.5), 0 0 12px ${color}40` }}
+                        >
+                          {value}
+                        </p>
+                        {sub && (
+                          <p
+                            className="text-xs font-display font-semibold ink-deep"
+                            style={{ textShadow: '0 1px 0 rgba(255,255,255,0.4)' }}
+                          >
+                            {sub}
+                          </p>
+                        )}
+                        <p
+                          className="text-xs font-display font-semibold mt-0.5"
+                          style={{ color: 'rgba(30,30,60,0.65)', textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
+                        >
+                          {label}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div
+                  style={{ borderTop: '1.5px solid rgba(255,255,255,0.28)', marginBottom: '1.25rem' }}
+                />
+
+                {/* ── Pediatric Calibration Layer ── */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Users
+                      className="w-5 h-5"
+                      style={{ color: 'hsl(160,65%,40%)', filter: 'drop-shadow(0 0 4px hsl(160,65%,50%,0.4))' }}
+                    />
+                    <h2
+                      className="font-display font-bold text-xl ink-deep"
+                      style={{ textShadow: '0 2px 0 rgba(255,255,255,0.6), 0 4px 12px rgba(0,0,0,0.1)' }}
+                    >
+                      Pediatric Calibration Layer
+                    </h2>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {/* Calibration mode */}
+                    <GlassCard tint="mint" className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <BarChart2 className="w-4 h-4" style={{ color: 'hsl(160,65%,45%)' }} />
+                        <p
+                          className="font-display font-bold text-sm ink-deep"
+                          style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
+                        >
+                          Calibration Mode
+                        </p>
+                      </div>
+                      <span
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-display font-bold text-sm"
+                        style={{
+                          background: 'rgba(80,200,140,0.22)',
+                          border: '1.5px solid hsl(160,65%,45%)',
+                          color: 'hsl(160,55%,28%)',
+                          textShadow: '0 1px 0 rgba(255,255,255,0.5)',
+                        }}
+                      >
+                        Pediatric 6–11
+                      </span>
+                      <p
+                        className="text-xs font-semibold ink-deep mt-2"
+                        style={{ textShadow: '0 1px 0 rgba(255,255,255,0.4)' }}
+                      >
+                        Age-matched norms for children aged 6–11 years
+                      </p>
+                    </GlassCard>
+
+                    {/* Calibrated features */}
+                    <GlassCard tint="sky" className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Layers className="w-4 h-4" style={{ color: 'hsl(200,80%,55%)' }} />
+                        <p
+                          className="font-display font-bold text-sm ink-deep"
+                          style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
+                        >
+                          Calibrated Features
+                        </p>
+                      </div>
+                      <p
+                        className="text-sm font-semibold ink-deep leading-relaxed"
+                        style={{ textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}
+                      >
+                        Raw game metrics are normalized against pediatric baseline data before model inference.
+                      </p>
+                    </GlassCard>
+                  </div>
+
+                  <p
+                    className="text-xs font-display font-semibold mt-3 pt-3"
+                    style={{
+                      borderTop: '1px solid rgba(255,255,255,0.22)',
+                      color: 'rgba(30,30,60,0.7)',
+                      textShadow: '0 1px 0 rgba(255,255,255,0.5)',
+                    }}
+                  >
+                    For parents: scores reflect child-appropriate (age 6–11) standards, not adult norms.
+                  </p>
                 </div>
               </GlassCard>
             </motion.div>

@@ -7,6 +7,7 @@ import { GlassCard, GlassButton } from '@/components/ui/glass';
 import { SeedGem } from './SeedGem';
 
 import hiddenReefBg from '@/assets/hidden-reef-bg.jpg';
+import { SceneBg } from './SceneBg';
 import pipImage from '@/assets/mindling-pip.png';
 import miraImage from '@/assets/mindling-mira.png';
 import veeImage from '@/assets/mindling-vee.png';
@@ -365,12 +366,7 @@ export function HiddenReefGame() {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       {/* ── Background ─────────────────────────────────────── */}
-      <img
-        src={hiddenReefBg}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
-      />
+      <SceneBg src={hiddenReefBg} />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{

@@ -6,6 +6,7 @@ import { Pause, SkipForward, Play, RotateCcw, Map } from 'lucide-react';
 
 import echoBayBg from '@/assets/echo-bay-bg.jpg';
 import { SeedGem } from './SeedGem';
+import { SceneBg } from './SceneBg';
 import { GlassCard, GlassButton } from '@/components/ui/glass';
 import pipImage from '@/assets/mindling-pip.png';
 import miraImage from '@/assets/mindling-mira.png';
@@ -402,12 +403,7 @@ export function EchoBayGame() {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       {/* Background */}
-      <img
-        src={echoBayBg}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
-      />
+      <SceneBg src={echoBayBg} />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{

@@ -18,4 +18,18 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Target modern browsers — smaller, faster output
+    target: "esnext",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks are cached separately; only the app chunk changes on each deploy
+          "vendor-react":  ["react", "react-dom"],
+          "vendor-motion": ["framer-motion"],
+          "vendor-icons":  ["lucide-react"],
+        },
+      },
+    },
+  },
 }));

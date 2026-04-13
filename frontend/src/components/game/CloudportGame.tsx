@@ -7,6 +7,7 @@ import { GlassCard, GlassButton } from '@/components/ui/glass';
 
 import { Firefly as FireflyComponent } from './Firefly';
 import { SeedGem } from './SeedGem';
+import { SceneBg } from './SceneBg';
 import level1Bg from '@/assets/level1.png';
 import pipImage from '@/assets/mindling-pip.png';
 import miraImage from '@/assets/mindling-mira.png';
@@ -190,12 +191,7 @@ export function CloudportGame() {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       {/* ── Background ─────────────────────────────────────── */}
-      <img
-        src={level1Bg}
-        alt=""
-        aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
-      />
+      <SceneBg src={level1Bg} />
 
       {/* ── HUD ────────────────────────────────────────────── */}
       <div className="relative z-20 flex items-start justify-between px-3 md:px-5 pt-3 md:pt-4">
