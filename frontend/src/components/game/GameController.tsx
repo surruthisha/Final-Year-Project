@@ -37,6 +37,7 @@ function getScreen(screen: string) {
 
 export function GameController() {
   const { state } = useGame();
+  const isReport = state.screen === 'report';
 
   return (
     <AnimatePresence mode="wait">
@@ -47,7 +48,7 @@ export function GameController() {
         animate="animate"
         exit="exit"
         transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-        className="min-h-screen w-full"
+        className={`w-full ${isReport ? 'min-h-screen' : 'h-screen overflow-hidden'}`}
       >
         {getScreen(state.screen)}
       </motion.div>

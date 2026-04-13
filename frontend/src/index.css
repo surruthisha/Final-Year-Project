@@ -1,14 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Quicksand:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Remove white background from Mindling PNGs */
 .mindling-img {
   mix-blend-mode: multiply;
   filter: drop-shadow(0 4px 16px hsla(45, 100%, 60%, 0.5));
 }
-@tailwind components;
-@tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Quicksand:wght@300;400;500;600;700&display=swap');
 
 /* Mindscape of Mindlings - Vivid, Bouncy, Moshi Monsters meets Nintendo */
 
@@ -102,6 +102,39 @@
     --sidebar-accent-foreground: 209 80% 22%;
     --sidebar-border: 210 28% 86%;
     --sidebar-ring: 210 80% 55%;
+
+    /* ── Pastel Glass System (Moshi-meets-visionOS) ─────── */
+    /* Candy-bright pastel tints used as accents on glass surfaces */
+    --glass-tint-sky:    200 90% 78%;
+    --glass-tint-mint:   158 78% 78%;
+    --glass-tint-peach:  18 100% 80%;
+    --glass-tint-lilac:  282 80% 84%;
+    --glass-tint-butter: 48 100% 80%;
+    --glass-tint-bubble: 330 90% 84%;
+
+    /* Glass surface fills + borders */
+    --glass-surface:        255 255 255 / 0.22;
+    --glass-surface-strong: 255 255 255 / 0.34;
+    --glass-surface-soft:   255 255 255 / 0.14;
+    --glass-stroke:         255 255 255 / 0.55;
+    --glass-stroke-soft:    255 255 255 / 0.28;
+    --glass-inner-shadow:   255 255 255 / 0.45;
+
+    /* Deep playful sky for the new pastel scenes */
+    --sky-pastel-top:    202 100% 86%;
+    --sky-pastel-mid:    220 92% 80%;
+    --sky-pastel-bottom: 282 78% 82%;
+
+    /* Candy-soft text colours that sit nicely on glass */
+    --ink-deep:    232 60% 22%;
+    --ink-soft:    232 40% 38%;
+    --ink-cream:   42 100% 96%;
+
+    /* Soft outer glow rings around glass elements */
+    --glass-glow-sky:    0 24px 60px -16px hsl(200 100% 60% / 0.55);
+    --glass-glow-peach:  0 24px 60px -16px hsl(18 100% 65% / 0.55);
+    --glass-glow-lilac:  0 24px 60px -16px hsl(282 90% 70% / 0.55);
+    --glass-glow-butter: 0 24px 60px -16px hsl(48 100% 60% / 0.65);
   }
 
   .dark {
@@ -140,14 +173,140 @@
     @apply border-border;
   }
 
+  html, body, #root {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+  }
+
+  html, body {
+    overflow: hidden;
+    /* Deep navy fallback so any sub-pixel gap reads as the night-sky theme,
+       not as a bright white bar. */
+    background-color: hsl(232 55% 10%);
+  }
+
+  /* Allow scrolling on specific screens (e.g. cognitive report) */
+  html.allow-scroll,
+  html.allow-scroll body {
+    overflow: visible;
+    overflow-y: auto;
+  }
+
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply text-foreground antialiased;
     font-family: 'Quicksand', sans-serif;
     font-weight: 600;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Baloo 2', cursive;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   Liquid Glass / Glassmorphism Component Classes
+   Placed in @layer components so Tailwind utility classes
+   (fixed, absolute, top-*, left-*, etc.) emitted later in the
+   utilities layer can override their layout properties.
+   ────────────────────────────────────────────────────────── */
+@layer components {
+  .glass-surface {
+    background: linear-gradient(
+      135deg,
+      rgba(var(--glass-surface-strong)) 0%,
+      rgba(var(--glass-surface)) 60%,
+      rgba(var(--glass-surface-soft)) 100%
+    );
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(var(--glass-stroke-soft));
+    box-shadow:
+      0 1px 0 0 rgba(var(--glass-inner-shadow)) inset,
+      0 -1px 0 0 rgba(255 255 255 / 0.15) inset,
+      0 18px 50px -18px hsl(232 60% 18% / 0.45),
+      0 8px 24px -12px hsl(232 60% 18% / 0.30);
+  }
+
+  .glass-card {
+    @apply glass-surface rounded-[2rem];
+    position: relative;
+    isolation: isolate;
+    /* Promote to its own GPU compositing layer so the backdrop-filter
+       blur can be cached instead of recomputed on every frame while the
+       animated background moves behind it. */
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      rgba(var(--glass-stroke)) 0%,
+      rgba(255 255 255 / 0.1) 35%,
+      rgba(255 255 255 / 0.05) 60%,
+      rgba(var(--glass-stroke)) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .glass-button {
+    @apply glass-surface;
+    border-radius: 9999px;
+    position: relative;
+    isolation: isolate;
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.3s ease;
+    /* Same GPU-layer promotion as .glass-card — caches the blur. */
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  .glass-button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(
+      180deg,
+      rgba(255 255 255 / 0.85) 0%,
+      rgba(255 255 255 / 0.2) 50%,
+      rgba(255 255 255 / 0.55) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .glass-button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      180deg,
+      rgba(255 255 255 / 0.45) 0%,
+      rgba(255 255 255 / 0) 45%
+    );
+    pointer-events: none;
+    mix-blend-mode: overlay;
   }
 }
 
@@ -227,6 +386,160 @@
   .text-stroke {
     -webkit-text-stroke: 2px hsl(var(--foreground) / 0.3);
     paint-order: stroke fill;
+  }
+
+  .glass-tint-sky    { background-color: hsl(var(--glass-tint-sky)    / 0.32); }
+  .glass-tint-mint   { background-color: hsl(var(--glass-tint-mint)   / 0.32); }
+  .glass-tint-peach  { background-color: hsl(var(--glass-tint-peach)  / 0.34); }
+  .glass-tint-lilac  { background-color: hsl(var(--glass-tint-lilac)  / 0.34); }
+  .glass-tint-butter { background-color: hsl(var(--glass-tint-butter) / 0.40); }
+  .glass-tint-bubble { background-color: hsl(var(--glass-tint-bubble) / 0.34); }
+
+  /* Pastel Moshi-style sky background */
+  .pastel-sky {
+    background:
+      radial-gradient(ellipse at 20% 10%, hsl(var(--glass-tint-butter) / 0.7) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 0%,  hsl(var(--glass-tint-peach)  / 0.55) 0%, transparent 45%),
+      radial-gradient(ellipse at 50% 100%, hsl(var(--glass-tint-lilac) / 0.6) 0%, transparent 55%),
+      linear-gradient(180deg,
+        hsl(var(--sky-pastel-top))    0%,
+        hsl(var(--sky-pastel-mid))   55%,
+        hsl(var(--sky-pastel-bottom)) 100%);
+  }
+
+  .ink-deep  { color: hsl(var(--ink-deep)); }
+  .ink-soft  { color: hsl(var(--ink-soft)); }
+  .ink-cream { color: hsl(var(--ink-cream)); }
+
+  /* ──────────────────────────────────────────────────────────
+     Glass-friendly animations
+     ────────────────────────────────────────────────────────── */
+  .drift-slow   { animation: drift 28s ease-in-out infinite; }
+  .drift-medium { animation: drift 18s ease-in-out infinite; }
+  .drift-fast   { animation: drift 12s ease-in-out infinite; }
+  .sky-shift    { animation: skyShift 20s ease-in-out infinite; }
+  .breathe      { animation: breathe 4s ease-in-out infinite; }
+  .specular     { animation: specular 6s ease-in-out infinite; }
+
+  @keyframes drift {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(40px, -16px, 0); }
+  }
+
+  @keyframes skyShift {
+    0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+    50%      { filter: hue-rotate(8deg) brightness(1.05); }
+  }
+
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.025); }
+  }
+
+  @keyframes specular {
+    0%, 100% { background-position: -150% 0; }
+    50%      { background-position: 250% 0; }
+  }
+
+  .specular-sweep {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      105deg,
+      transparent 35%,
+      rgba(255 255 255 / 0.55) 50%,
+      transparent 65%
+    );
+    background-size: 220% 100%;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    animation: specular 6s ease-in-out infinite;
+  }
+
+  /* ──────────────────────────────────────────────────────────
+     Compositor-thread animations (no JS — replace Framer loops
+     for clouds, orbs, fireflies, and the hero island bob).
+     ────────────────────────────────────────────────────────── */
+  .cloud-drift {
+    animation: cloudDrift var(--drift-dur, 14s) ease-in-out var(--drift-delay, 0s) infinite;
+    will-change: transform;
+  }
+
+  .orb-float {
+    animation: orbFloat var(--orb-dur, 10s) ease-in-out var(--orb-delay, 0s) infinite;
+  }
+
+  .firefly-drift {
+    animation: fireflyDrift var(--ff-dur, 12s) ease-in-out var(--ff-delay, 0s) infinite;
+  }
+
+  .island-bob {
+    animation: islandBob 7s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .island-pulse {
+    animation: islandPulse 2.8s ease-in-out infinite;
+  }
+
+  @keyframes cloudDrift {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(var(--cx, 30px), var(--cy, -6px), 0); }
+  }
+
+  @keyframes orbFloat {
+    0%, 100% {
+      transform: translate3d(0, 0, 0) scale(0.85);
+      opacity: 0.55;
+    }
+    50% {
+      transform: translate3d(14px, -22px, 0) scale(1.15);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fireflyDrift {
+    0%   { transform: translate3d(0, 0, 0) rotate(0deg);   opacity: 0.6; }
+    33%  { transform: translate3d(20px, -25px, 0) rotate(8deg); opacity: 1; }
+    66%  { transform: translate3d(-10px, 10px, 0) rotate(-8deg); opacity: 0.6; }
+    100% { transform: translate3d(0, 0, 0) rotate(0deg);   opacity: 0.6; }
+  }
+
+  @keyframes islandBob {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(0, -10px, 0); }
+  }
+
+  @keyframes islandPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1);   opacity: 0.5; }
+    50%      { transform: translate(-50%, -50%) scale(1.25); opacity: 0.85; }
+  }
+
+  @keyframes fireflyGlow {
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 1; }
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   Reduced-motion: strip decorative animations for
+   accessibility and low-end GPU savings.
+   ────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .cloud-drift,
+  .orb-float,
+  .firefly-drift,
+  .island-bob,
+  .island-pulse,
+  .drift-slow,
+  .drift-medium,
+  .drift-fast,
+  .sky-shift,
+  .breathe,
+  .specular-sweep,
+  .float-animation {
+    animation: none !important;
   }
 }
 

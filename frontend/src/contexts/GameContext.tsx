@@ -5,10 +5,11 @@ type GameAction =
   | { type: 'SET_SCREEN'; screen: GameScreen }
   | { type: 'SELECT_MINDLING'; mindling: Mindling }
   | { type: 'SET_MINDLING_NAME'; name: string }
-  | { type: 'COLLECT_SEED'; seedType: 'spark' | 'logic' | 'harmony' }
+  | { type: 'COLLECT_SEED'; seedType: 'spark' | 'logic' | 'memory' | 'harmony' }
   | { type: 'UNLOCK_ISLAND'; island: IslandType }
   | { type: 'SET_CURRENT_ISLAND'; island: IslandType | null }
   | { type: 'UPDATE_STATS'; statsType: keyof GameStats; stats: GameStats[keyof GameStats] }
+  | { type: 'COMPLETE_ISLAND'; island: IslandType }
   | { type: 'EVOLVE_MINDLING' }
   | { type: 'RESET_GAME' }
   | { type: 'TOGGLE_MUSIC' }
@@ -33,6 +34,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (action.seedType === 'logic' && !newUnlockedIslands.includes('hidden-reef')) {
         newUnlockedIslands.push('hidden-reef');
       }
+      if (action.seedType === 'memory' && !newUnlockedIslands.includes('echo-bay')) {
+        newUnlockedIslands.push('echo-bay');
+      }
       if (action.seedType === 'harmony' && !newUnlockedIslands.includes('heart-isle')) {
         newUnlockedIslands.push('heart-isle');
       }
@@ -45,6 +49,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, currentIsland: action.island };
     case 'UPDATE_STATS':
       return { ...state, stats: { ...state.stats, [action.statsType]: action.stats } };
+    case 'COMPLETE_ISLAND':
+      if (state.completedIslands.includes(action.island)) return state;
+      return { ...state, completedIslands: [...state.completedIslands, action.island] };
     case 'EVOLVE_MINDLING':
       return { ...state, isEvolved: true };
     case 'RESET_GAME':

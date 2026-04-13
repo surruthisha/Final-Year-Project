@@ -59,7 +59,7 @@ export interface Island {
   id: IslandType;
   name: string;
   description: string;
-  seedType: 'spark' | 'logic' | 'harmony' | null;
+  seedType: 'spark' | 'logic' | 'memory' | 'harmony' | null;
   seedColor: string;
 }
 
@@ -82,8 +82,8 @@ export const ISLANDS: Island[] = [
     id: 'hidden-reef',
     name: 'Hidden Reef',
     description: 'Pop the bubbles and find matching pairs! Test your memory.',
-    seedType: null,
-    seedColor: '',
+    seedType: 'memory',
+    seedColor: 'seed-memory',
   },
   {
     id: 'echo-bay',
@@ -133,9 +133,11 @@ export interface GameState {
   seeds: {
     spark: boolean;
     logic: boolean;
+    memory: boolean;
     harmony: boolean;
   };
   unlockedIslands: IslandType[];
+  completedIslands: IslandType[];
   currentIsland: IslandType | null;
   stats: GameStats;
   isEvolved: boolean;
@@ -152,9 +154,11 @@ export const initialGameState: GameState = {
   seeds: {
     spark: false,
     logic: false,
+    memory: false,
     harmony: false,
   },
   unlockedIslands: ['cloudport'],
+  completedIslands: [],
   currentIsland: null,
   stats: {
     cloudport: null,

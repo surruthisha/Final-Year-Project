@@ -1,26 +1,26 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
 import { IslandType, ISLANDS } from '@/types/game';
 import { Lock, Sparkles } from 'lucide-react';
-import floatingIslandsBg from '@/assets/floating-islands-bg.jpg';
+import { GlassCard, GlassButton } from '@/components/ui/glass';
+import { SeedGem } from './SeedGem';
 
+import worldMapPng from '@/assets/world map.png';
 import pipImage from '@/assets/mindling-pip.png';
 import miraImage from '@/assets/mindling-mira.png';
 import veeImage from '@/assets/mindling-vee.png';
 import nuoImage from '@/assets/mindling-nuo.png';
 
-import { SeedGem } from './SeedGem';
-
 const mindlingImages = { pip: pipImage, mira: miraImage, vee: veeImage, nuo: nuoImage };
 
-// Single source of truth for island positions (numeric for both CSS and SVG)
+// Positions tuned to the world-map illustration landmarks
 const islandPos: Record<IslandType, { x: number; y: number }> = {
-  'cloudport': { x: 20, y: 18 },
-  'star-bridge': { x: 70, y: 22 },
-  'hidden-reef': { x: 50, y: 42 },
-  'echo-bay': { x: 25, y: 62 },
-  'heart-isle': { x: 70, y: 72 },
+  'cloudport':   { x: 22, y: 30 },   // castle / rainbow area (top-left)
+  'star-bridge': { x: 52, y: 25 },   // mountains (top-center)
+  'hidden-reef': { x: 35, y: 58 },   // coastal village (center-left)
+  'echo-bay':    { x: 70, y: 44 },   // waterfall area (center-right)
+  'heart-isle':  { x: 78, y: 72 },   // small island (bottom-right)
 };
 
 // Path connections between islands in order
@@ -31,11 +31,21 @@ const PATH_CONNECTIONS: [IslandType, IslandType][] = [
   ['echo-bay', 'heart-isle'],
 ];
 
-// Which seed unlocks the glow for each path segment (seed earned at the "from" island)
-const PATH_SEED: Record<string, 'spark' | 'logic' | 'harmony'> = {
+// Which seed unlocks the glow for each path segment
+const PATH_SEED: Record<string, 'spark' | 'logic' | 'memory' | 'harmony'> = {
   'cloudport->star-bridge': 'spark',
   'star-bridge->hidden-reef': 'logic',
-  'hidden-reef->echo-bay': 'harmony',
+  'hidden-reef->echo-bay': 'memory',
+  'echo-bay->heart-isle': 'harmony',
+};
+
+// Per-island glass tint + hue for glow ring
+const ISLAND_STYLE: Record<IslandType, { hue: number; tint: string; icon: string }> = {
+  'cloudport':   { hue: 200, tint: 'sky',   icon: '☁️' },
+  'star-bridge': { hue: 230, tint: 'lilac', icon: '⭐' },
+  'hidden-reef': { hue: 170, tint: 'mint',  icon: '🫧' },
+  'echo-bay':    { hue: 282, tint: 'lilac', icon: '🔮' },
+  'heart-isle':  { hue: 340, tint: 'peach', icon: '💖' },
 };
 
 export function WorldMap() {
@@ -45,225 +55,301 @@ export function WorldMap() {
   const handleIslandClick = (islandId: IslandType) => {
     if (!state.unlockedIslands.includes(islandId)) return;
     playSwoosh();
-    
     dispatch({ type: 'SET_CURRENT_ISLAND', island: islandId });
     dispatch({ type: 'SET_SCREEN', screen: 'level-intro' });
   };
 
-  const getIslandColor = (islandId: IslandType) => {
-    switch (islandId) {
-      case 'cloudport': return 'from-sky-medium to-sky-light';
-      case 'star-bridge': return 'from-seed-logic to-blue-400';
-      case 'hidden-reef': return 'from-cyan-400 to-teal-500';
-      case 'echo-bay': return 'from-seed-harmony to-purple-400';
-      case 'heart-isle': return 'from-seed-spark to-amber-300';
-      default: return 'from-muted to-muted-foreground';
-    }
-  };
-
   return (
-    <div className="min-h-screen w-full relative overflow-hidden">
-      {/* Background */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${floatingIslandsBg})` }}
+    <div className="relative h-screen w-full overflow-hidden">
+      {/* ── World map background ───────────────────────────── */}
+      <img
+        src={worldMapPng}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
       />
-      <div className="absolute inset-0" style={{
-        background: 'linear-gradient(180deg, hsla(209,60%,18%,0.1) 0%, transparent 30%, transparent 70%, hsla(209,65%,15%,0.15) 100%)',
-      }} />
 
-      {/* Header */}
-      <div className="relative z-10 flex items-center p-4 md:p-6">
-        <div className="flex-1" />
+      {/* Soft vignette overlay for depth */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse at 50% 40%, transparent 40%, hsla(220,60%,10%,0.25) 100%)',
+        }}
+      />
 
-        <motion.h1
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="game-title text-2xl md:text-4xl drop-shadow-lg"
-          style={{ color: 'hsl(42 90% 72%)', textShadow: '0 2px 12px hsl(209 90% 15% / 0.6)' }}
+      {/* ── SVG connection lines ───────────────────────────── */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none z-[5]">
+        <defs>
+          <filter id="wm-glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {/* Base dotted lines */}
+        {PATH_CONNECTIONS.map(([from, to]) => (
+          <line
+            key={`${from}-${to}`}
+            x1={`${islandPos[from].x}%`}
+            y1={`${islandPos[from].y}%`}
+            x2={`${islandPos[to].x}%`}
+            y2={`${islandPos[to].y}%`}
+            stroke="rgba(255,255,255,0.45)"
+            strokeWidth="3"
+            strokeDasharray="8,6"
+            strokeLinecap="round"
+          />
+        ))}
+
+        {/* Glow lines for completed paths */}
+        {PATH_CONNECTIONS.map(([from, to], i) => {
+          const key = `${from}->${to}`;
+          const seed = PATH_SEED[key];
+          const isActive = seed
+            ? state.seeds[seed]
+            : state.seeds.spark && state.seeds.logic && state.seeds.harmony;
+          if (!isActive) return null;
+          return (
+            <motion.line
+              key={`glow-${from}-${to}`}
+              x1={`${islandPos[from].x}%`}
+              y1={`${islandPos[from].y}%`}
+              x2={`${islandPos[to].x}%`}
+              y2={`${islandPos[to].y}%`}
+              stroke="hsla(48,100%,72%,0.85)"
+              strokeWidth="4"
+              strokeDasharray="8,6"
+              strokeLinecap="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 1.5, ease: 'easeInOut', delay: i * 0.3 }}
+              filter="url(#wm-glow)"
+            />
+          );
+        })}
+      </svg>
+
+      {/* ── Header bar ─────────────────────────────────────── */}
+      <div className="relative z-10 flex items-start justify-center px-4 md:px-6 pt-4 md:pt-5">
+        {/* Title plaque — centered */}
+        <motion.div
+          initial={{ y: -20, scale: 0.94 }}
+          animate={{ y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 18, delay: 0.1 }}
         >
-          WORLD MAP
-        </motion.h1>
-
-        {/* Seed Bag */}
-        <div className="flex-1 flex justify-end">
-          <motion.div
-            className="flex items-center gap-2 px-4 py-2 rounded-game shadow-soft"
-            style={{
-              background: 'hsl(210 31% 76% / 0.92)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid hsl(210 30% 68% / 0.5)',
-            }}
-            animate={{ scale: seedCount > 0 ? [1, 1.1, 1] : 1 }}
+          <GlassCard
+            tint="butter"
+            shimmer
+            className="px-8 md:px-12 py-2.5 md:py-3"
+            style={{ boxShadow: 'var(--glass-glow-butter)' }}
           >
+            <h1
+              className="game-title text-xl md:text-3xl ink-deep leading-tight"
+              style={{
+                textShadow:
+                  '0 2px 0 rgba(255,255,255,0.6), 0 6px 16px hsla(48,100%,50%,0.35)',
+              }}
+            >
+              World Map
+            </h1>
+          </GlassCard>
+        </motion.div>
+
+        {/* Seed bag — pinned to top-right */}
+        <motion.div
+          initial={{ y: -20, scale: 0.94 }}
+          animate={{ y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 18, delay: 0.2 }}
+          className="absolute right-4 md:right-6 top-4 md:top-5"
+        >
+          <GlassCard tint="sky" className="px-4 md:px-5 py-2 md:py-2.5 flex items-center gap-2">
             <div className="flex -space-x-1">
               {state.seeds.spark && <SeedGem type="spark" size={22} animate={false} />}
               {state.seeds.logic && <SeedGem type="logic" size={22} animate={false} />}
+              {state.seeds.memory && <SeedGem type="memory" size={22} animate={false} />}
               {state.seeds.harmony && <SeedGem type="harmony" size={22} animate={false} />}
             </div>
-            <span className="font-display font-bold text-lg text-foreground">{seedCount}/3 Seeds</span>
-            <Sparkles className="w-5 h-5 text-primary" />
-          </motion.div>
-        </div>
+            <span className="font-display font-bold text-base md:text-lg ink-deep">
+              {seedCount}/4
+            </span>
+            <Sparkles className="w-4 h-4 ink-deep" strokeWidth={2.4} />
+          </GlassCard>
+        </motion.div>
       </div>
 
-      {/* Islands */}
-      <div className="relative z-10 w-full h-[calc(100vh-80px)]">
-        {/* Connection lines */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none">
-          <defs>
-            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0.3" />
-            </linearGradient>
-            <linearGradient id="lineGradientActive" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="hsl(var(--secondary))" stopOpacity="0.8" />
-            </linearGradient>
-            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-
-          {/* Base dotted lines between islands */}
-          {PATH_CONNECTIONS.map(([from, to]) => (
-            <line
-              key={`${from}-${to}`}
-              x1={`${islandPos[from].x}%`} y1={`${islandPos[from].y}%`}
-              x2={`${islandPos[to].x}%`} y2={`${islandPos[to].y}%`}
-              stroke="url(#lineGradient)" strokeWidth="3" strokeDasharray="10,5"
-            />
-          ))}
-
-          {/* Animated glow lines for completed paths */}
-          {PATH_CONNECTIONS.map(([from, to], i) => {
-            const key = `${from}->${to}`;
-            const seed = PATH_SEED[key];
-            // Last path (echo-bay -> heart-isle) glows when all 3 seeds collected
-            const isActive = seed ? state.seeds[seed] : (state.seeds.spark && state.seeds.logic && state.seeds.harmony);
-            if (!isActive) return null;
-            return (
-              <motion.line
-                key={`glow-${from}-${to}`}
-                x1={`${islandPos[from].x}%`} y1={`${islandPos[from].y}%`}
-                x2={`${islandPos[to].x}%`} y2={`${islandPos[to].y}%`}
-                stroke="url(#lineGradientActive)" strokeWidth="4" strokeDasharray="10,5"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: [0.4, 1, 0.4] }}
-                transition={{
-                  pathLength: { duration: 1.5, ease: "easeInOut", delay: i * 0.3 },
-                  opacity: { duration: 2, repeat: Infinity },
-                }}
-                filter="url(#glow)"
-              />
-            );
-          })}
-        </svg>
-
+      {/* ── Island nodes ───────────────────────────────────── */}
+      <div className="absolute inset-0 z-10">
         {ISLANDS.map((island, index) => {
           const isUnlocked = state.unlockedIslands.includes(island.id);
-          const isCompleted = island.seedType ? state.seeds[island.seedType] : false;
+          const isProperlyCompleted = state.completedIslands.includes(island.id);
+          const hasSeed = island.seedType ? state.seeds[island.seedType] : false;
+          const isCompleted = hasSeed || isProperlyCompleted;
           const pos = islandPos[island.id];
+          const style = ISLAND_STYLE[island.id];
 
           return (
             <div
               key={island.id}
-              style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-              className="absolute -translate-x-1/2 -translate-y-10 md:-translate-y-14"
+              className="absolute"
+              style={{
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
+                transform: 'translateX(-50%)',
+                marginTop: '-1.5rem',
+              }}
             >
               <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: index * 0.15, type: "spring" }}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{
+                  delay: 0.3 + index * 0.12,
+                  type: 'spring',
+                  stiffness: 260,
+                  damping: 20,
+                }}
               >
                 <motion.button
                   onClick={() => handleIslandClick(island.id)}
                   disabled={!isUnlocked}
-                  whileHover={isUnlocked ? { scale: 1.1, y: -5 } : {}}
-                  whileTap={isUnlocked ? { scale: 0.95 } : {}}
-                  animate={isUnlocked ? { y: [0, -5, 0] } : {}}
-                  transition={{ duration: 3, repeat: Infinity }}
-                  className={`
-                    relative flex flex-col items-center
-                    ${!isUnlocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}
-                  `}
+                  whileHover={isUnlocked ? { scale: 1.12, y: -4 } : {}}
+                  whileTap={isUnlocked ? { scale: 0.92 } : {}}
+                  className="relative flex flex-col items-center group"
+                  style={{ cursor: isUnlocked ? 'pointer' : 'not-allowed' }}
                 >
-                {/* Island shape */}
-                <div className={`
-                  w-20 h-20 md:w-28 md:h-28 rounded-full 
-                  bg-gradient-to-br ${getIslandColor(island.id)}
-                  shadow-float flex items-center justify-center
-                  border-4 ${isCompleted ? 'border-primary' : 'border-card/50'}
-                  ${isUnlocked ? '' : 'grayscale'}
-                `}>
-                  {!isUnlocked ? (
-                    <Lock className="w-8 h-8 text-foreground/60" />
-                  ) : isCompleted ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                    >
-                      <Sparkles className="w-10 h-10 text-primary-foreground" />
-                    </motion.div>
-                  ) : (
-                    <div className="w-3 h-3 bg-card rounded-full" />
+                  {/* Pulsing glow ring behind (unlocked only) */}
+                  {isUnlocked && (
+                    <div
+                      className="absolute w-[4.5rem] h-[4.5rem] md:w-[6rem] md:h-[6rem] rounded-full island-pulse"
+                      style={{
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        background: `radial-gradient(circle, hsla(${style.hue},80%,65%,0.35) 0%, transparent 70%)`,
+                        ['--pulse-hue' as never]: style.hue,
+                      }}
+                    />
                   )}
-                </div>
 
-                {/* Island name */}
-                <div className={`
-                  mt-2 px-3 py-1 rounded-lg font-display text-sm md:text-base
-                  ${isUnlocked ? 'bg-card text-foreground' : 'bg-muted text-muted-foreground'}
-                  shadow-soft whitespace-nowrap
-                `}>
-                  {island.name}
-                  {!isUnlocked && <span className="ml-1 text-xs">[Locked]</span>}
-                </div>
+                  {/* Island node circle */}
+                  <div
+                    className="relative w-14 h-14 md:w-[4.5rem] md:h-[4.5rem] rounded-full grid place-items-center"
+                    style={{
+                      background: isUnlocked
+                        ? `linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.2) 50%, hsla(${style.hue},70%,80%,0.35) 100%)`
+                        : 'linear-gradient(135deg, rgba(180,180,190,0.4) 0%, rgba(150,150,160,0.25) 100%)',
+                      backdropFilter: 'blur(16px) saturate(160%)',
+                      WebkitBackdropFilter: 'blur(16px) saturate(160%)',
+                      border: isProperlyCompleted
+                        ? `2.5px solid hsla(140,65%,50%,0.9)`
+                        : isCompleted
+                          ? `2.5px solid hsla(48,100%,65%,0.9)`
+                          : isUnlocked
+                            ? `2px solid rgba(255,255,255,0.55)`
+                            : '2px solid rgba(200,200,210,0.35)',
+                      boxShadow: isProperlyCompleted
+                        ? `0 0 0 2px hsla(140,60%,45%,0.5), 0 0 20px hsla(140,65%,50%,0.4), 0 8px 24px -6px hsla(232,60%,18%,0.3)`
+                        : isCompleted
+                          ? `0 0 0 2px hsla(48,90%,60%,0.5), 0 0 20px hsla(48,100%,55%,0.4), 0 8px 24px -6px hsla(232,60%,18%,0.3)`
+                          : isUnlocked
+                            ? `0 0 18px hsla(${style.hue},80%,60%,0.3), inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 24px -6px hsla(232,60%,18%,0.3)`
+                            : '0 4px 12px -4px hsla(232,60%,18%,0.2)',
+                      filter: isUnlocked ? 'none' : 'grayscale(0.6)',
+                      transition: 'box-shadow 0.4s ease, border-color 0.4s ease',
+                    }}
+                  >
+                    {!isUnlocked ? (
+                      <Lock className="w-5 h-5 md:w-6 md:h-6" style={{ color: 'hsl(232,30%,55%)' }} strokeWidth={2.5} />
+                    ) : isProperlyCompleted ? (
+                      <span className="text-xl md:text-2xl">✅</span>
+                    ) : isCompleted ? (
+                      <span className="text-xl md:text-2xl">✨</span>
+                    ) : (
+                      <span className="text-xl md:text-2xl">{style.icon}</span>
+                    )}
+                  </div>
+
+                  {/* Island name label */}
+                  <div
+                    className="mt-1.5 px-3 py-1 rounded-full whitespace-nowrap"
+                    style={{
+                      background: isUnlocked
+                        ? 'rgba(255,255,255,0.55)'
+                        : 'rgba(200,200,210,0.4)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
+                      border: '1px solid rgba(255,255,255,0.4)',
+                      boxShadow: '0 4px 12px -4px hsla(232,60%,18%,0.2)',
+                    }}
+                  >
+                    <span
+                      className="font-display font-bold text-xs md:text-sm"
+                      style={{
+                        color: isUnlocked ? 'hsl(232,50%,22%)' : 'hsl(232,20%,50%)',
+                        textShadow: '0 1px 0 rgba(255,255,255,0.5)',
+                      }}
+                    >
+                      {island.name}
+                    </span>
+                    {!isUnlocked && (
+                      <span className="ml-1 text-[10px]" style={{ color: 'hsl(232,20%,55%)' }}>
+                        🔒
+                      </span>
+                    )}
+                  </div>
                 </motion.button>
               </motion.div>
             </div>
           );
         })}
+      </div>
 
-        {/* Mindling Avatar */}
-        {state.selectedMindling && (
+      {/* ── Mindling avatar (bottom-left) ──────────────────── */}
+      {state.selectedMindling && (
+        <div className="fixed bottom-5 left-5 z-20">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="fixed bottom-6 left-6 z-20"
+            transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.6 }}
+            className="flex flex-col items-center"
           >
-            <motion.div
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="relative flex flex-col items-center"
+            <div
+              className="relative w-16 h-16 md:w-20 md:h-20 rounded-full grid place-items-center"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.18) 60%, hsla(48,80%,80%,0.3) 100%)',
+                backdropFilter: 'blur(20px) saturate(170%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(170%)',
+                border: '2px solid rgba(255,255,255,0.5)',
+                boxShadow:
+                  '0 0 0 2px hsla(48,90%,65%,0.6), 0 0 20px hsla(48,100%,55%,0.35), 0 12px 28px -8px hsla(232,60%,18%,0.3)',
+              }}
             >
-              <div className="rounded-full p-1" style={{
-                background: 'linear-gradient(180deg, hsl(42 90% 68%) 0%, hsl(42 85% 52%) 100%)',
-                boxShadow: '0 4px 16px hsl(42 90% 50% / 0.45)',
-              }}>
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden flex items-center justify-center"
-                  style={{ background: 'linear-gradient(180deg, hsl(210 38% 88%) 0%, hsl(210 32% 80%) 100%)' }}
-                >
-                  <img 
-                    src={mindlingImages[state.selectedMindling.type]}
-                    alt={state.selectedMindling.name}
-                    className="w-[85%] h-[85%] object-contain"
-                    style={{ filter: 'drop-shadow(0 2px 4px hsl(200 50% 50% / 0.3))' }}
-                  />
-                </div>
-              </div>
-              <div className="mt-1 bg-primary text-primary-foreground px-3 py-0.5 
-                              rounded-full text-xs font-display font-bold whitespace-nowrap shadow-soft">
+              <img
+                src={mindlingImages[state.selectedMindling.type]}
+                alt={state.selectedMindling.name}
+                className="w-[80%] h-[80%] object-contain drop-shadow-[0_4px_8px_rgba(80,30,140,0.35)] float-animation"
+              />
+            </div>
+
+            <div
+              className="mt-1 px-3 py-0.5 rounded-full"
+              style={{
+                background: 'hsla(48,100%,82%,0.85)',
+                border: '1px solid hsla(48,90%,65%,0.7)',
+                boxShadow: '0 4px 12px hsla(48,100%,55%,0.3)',
+              }}
+            >
+              <span className="font-display font-bold text-xs ink-deep">
                 {state.mindlingName}
-              </div>
-            </motion.div>
+              </span>
+            </div>
           </motion.div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 interface SeedGemProps {
-  type: 'spark' | 'logic' | 'harmony';
+  type: 'spark' | 'logic' | 'memory' | 'harmony';
   size?: number;
   animate?: boolean;
   className?: string;
@@ -21,6 +21,13 @@ const gemConfigs = {
     highlight: 'hsl(210, 90%, 80%)',
     glow: 'hsl(210, 100%, 60%)',
     shadow: 'hsl(220, 70%, 35%)',
+  },
+  memory: {
+    primary: 'hsl(160, 65%, 45%)',
+    secondary: 'hsl(170, 55%, 55%)',
+    highlight: 'hsl(155, 70%, 78%)',
+    glow: 'hsl(160, 80%, 55%)',
+    shadow: 'hsl(165, 55%, 30%)',
   },
   harmony: {
     primary: 'hsl(280, 60%, 60%)',

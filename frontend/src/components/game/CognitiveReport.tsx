@@ -1,9 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
-import { Play, RotateCcw, Lightbulb, Brain, Zap, Eye, Activity, Puzzle, Loader2, AlertTriangle, ShieldCheck, ShieldAlert, Download } from 'lucide-react';
+import {
+  RotateCcw,
+  Lightbulb,
+  Brain,
+  Zap,
+  Eye,
+  Activity,
+  Puzzle,
+  Loader2,
+  AlertTriangle,
+  ShieldCheck,
+  ShieldAlert,
+  Download,
+} from 'lucide-react';
 import { SeedGem } from './SeedGem';
-import { predictFromFrontendStats, type PredictionResult, type FrontendGameStats } from '@/lib/api';
+import { GlassCard, GlassButton } from '@/components/ui/glass';
+import {
+  predictFromFrontendStats,
+  type PredictionResult,
+  type FrontendGameStats,
+} from '@/lib/api';
 
 import heartIsleBg from '@/assets/heart-isle-bg.jpg';
 import pipImage from '@/assets/mindling-pip.png';
@@ -13,39 +31,79 @@ import nuoImage from '@/assets/mindling-nuo.png';
 
 const mindlingImages = { pip: pipImage, mira: miraImage, vee: veeImage, nuo: nuoImage };
 
-const DOMAIN_META: Record<string, { label: string; icon: typeof Zap; color: string }> = {
-  digit_symbol_coding:  { label: 'Processing Speed', icon: Zap,       color: 'text-seed-spark' },
-  trail_making_A:       { label: 'Visual Attention',  icon: Eye,       color: 'text-sky-400' },
-  trail_making_B:       { label: 'Cognitive Flexibility', icon: Puzzle, color: 'text-seed-logic' },
-  forward_memory_span:  { label: 'Short-term Memory', icon: Brain,     color: 'text-seed-harmony' },
-  reverse_memory_span:  { label: 'Working Memory',    icon: Activity,  color: 'text-secondary' },
-  progressive_matrices: { label: 'Fluid Reasoning',   icon: Lightbulb, color: 'text-amber-400' },
-};
+const DOMAIN_META: Record<string, { label: string; icon: typeof Zap; color: string; hue: number }> =
+  {
+    digit_symbol_coding: {
+      label: 'Processing Speed',
+      icon: Zap,
+      color: 'hsl(45,100%,55%)',
+      hue: 45,
+    },
+    trail_making_A: {
+      label: 'Visual Attention',
+      icon: Eye,
+      color: 'hsl(200,80%,55%)',
+      hue: 200,
+    },
+    trail_making_B: {
+      label: 'Cognitive Flexibility',
+      icon: Puzzle,
+      color: 'hsl(210,80%,55%)',
+      hue: 210,
+    },
+    forward_memory_span: {
+      label: 'Short-term Memory',
+      icon: Brain,
+      color: 'hsl(160,65%,45%)',
+      hue: 160,
+    },
+    reverse_memory_span: {
+      label: 'Working Memory',
+      icon: Activity,
+      color: 'hsl(280,60%,60%)',
+      hue: 280,
+    },
+    progressive_matrices: {
+      label: 'Fluid Reasoning',
+      icon: Lightbulb,
+      color: 'hsl(38,90%,55%)',
+      hue: 38,
+    },
+  };
 
 function zToPercent(z: number): number {
-  // Map z-score (-4 to +4) to a 0-100 bar width
   return Math.min(100, Math.max(5, ((z + 4) / 8) * 100));
 }
 
-function zLabel(z: number): { text: string; color: string } {
-  if (z >= 1.5)  return { text: 'Well above norm', color: 'text-emerald-700' };
-  if (z >= 0.5)  return { text: 'Above norm',      color: 'text-green-700' };
-  if (z >= -0.5) return { text: 'Within norm',     color: 'text-blue-700' };
-  if (z >= -1.5) return { text: 'Below norm',      color: 'text-amber-700' };
-  return            { text: 'Well below norm',  color: 'text-red-600' };
+function zLabel(z: number): { text: string; tint: 'mint' | 'sky' | 'butter' | 'peach' } {
+  if (z >= 1.5) return { text: 'Well above norm', tint: 'mint' };
+  if (z >= 0.5) return { text: 'Above norm', tint: 'mint' };
+  if (z >= -0.5) return { text: 'Within norm', tint: 'sky' };
+  if (z >= -1.5) return { text: 'Below norm', tint: 'butter' };
+  return { text: 'Well below norm', tint: 'peach' };
 }
 
-function riskBadge(risk: string) {
-  if (risk === 'Low') return { bg: 'bg-emerald-600/20', text: 'text-emerald-800', border: 'border-emerald-600/40' };
-  if (risk === 'Moderate') return { bg: 'bg-amber-500/20', text: 'text-amber-800', border: 'border-amber-600/40' };
-  return { bg: 'bg-red-500/20', text: 'text-red-700', border: 'border-red-600/40' };
+function barGradient(z: number): string {
+  if (z >= 0.5)
+    return 'linear-gradient(90deg, hsl(140,60%,50%), hsl(160,55%,45%))';
+  if (z >= -0.5)
+    return 'linear-gradient(90deg, hsl(200,70%,55%), hsl(210,65%,50%))';
+  if (z >= -1.5)
+    return 'linear-gradient(90deg, hsl(45,90%,55%), hsl(38,85%,50%))';
+  return 'linear-gradient(90deg, hsl(0,65%,55%), hsl(340,60%,50%))';
 }
 
-function barColor(z: number): string {
-  if (z >= 0.5) return 'bg-emerald-500';
-  if (z >= -0.5) return 'bg-blue-500';
-  if (z >= -1.5) return 'bg-amber-500';
-  return 'bg-red-500';
+function riskTint(risk: string): 'mint' | 'butter' | 'peach' {
+  if (risk === 'Low') return 'mint';
+  if (risk === 'Moderate') return 'butter';
+  return 'peach';
+}
+
+function classTint(cls: string): 'mint' | 'sky' | 'butter' | 'peach' {
+  if (cls === 'High') return 'mint';
+  if (cls === 'Average') return 'sky';
+  if (cls === 'Below avg') return 'butter';
+  return 'peach';
 }
 
 export function CognitiveReport() {
@@ -57,7 +115,6 @@ export function CognitiveReport() {
   const hasFetched = useRef(false);
 
   useEffect(() => {
-    // Only fetch once when the report mounts — stats don't change after this point
     if (hasFetched.current) return;
     hasFetched.current = true;
 
@@ -85,7 +142,9 @@ export function CognitiveReport() {
         const result = await predictFromFrontendStats(stats);
         setPrediction(result);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to connect to assessment server');
+        setError(
+          err instanceof Error ? err.message : 'Failed to connect to assessment server'
+        );
       } finally {
         setLoading(false);
       }
@@ -100,36 +159,43 @@ export function CognitiveReport() {
   const handleDownload = () => {
     if (!prediction) return;
 
-    const domainRows = Object.entries(prediction.zscores).map(([key, z]) => {
-      const meta = DOMAIN_META[key];
-      if (!meta) return '';
-      const lbl = zLabel(z);
-      const flag = z >= -0.5 ? 'OK' : z >= -1.5 ? 'MONITOR' : 'CONCERN';
-      const insight = z >= 0.5
-        ? `Strong ${meta.label.toLowerCase()} skills. Above adult average.`
-        : z >= -0.5
-        ? `${meta.label} is within the normal range. Keep practising!`
-        : z >= -1.5
-        ? `${meta.label} is below average. Targeted practice recommended.`
-        : `${meta.label} needs attention. Consider focused exercises.`;
-      const flagColor = flag === 'OK' ? '#10b981' : flag === 'MONITOR' ? '#f59e0b' : '#ef4444';
-      return `
+    const domainRows = Object.entries(prediction.zscores)
+      .map(([key, z]) => {
+        const meta = DOMAIN_META[key];
+        if (!meta) return '';
+        const lbl = zLabel(z);
+        const flag = z >= -0.5 ? 'OK' : z >= -1.5 ? 'MONITOR' : 'CONCERN';
+        const insight =
+          z >= 0.5
+            ? `Strong ${meta.label.toLowerCase()} skills. Above adult average.`
+            : z >= -0.5
+              ? `${meta.label} is within the normal range. Keep practising!`
+              : z >= -1.5
+                ? `${meta.label} is below average. Targeted practice recommended.`
+                : `${meta.label} needs attention. Consider focused exercises.`;
+        const flagColor =
+          flag === 'OK' ? '#10b981' : flag === 'MONITOR' ? '#f59e0b' : '#ef4444';
+        return `
         <tr>
           <td>${meta.label}</td>
           <td style="text-align:center">${z >= 0 ? '+' : ''}${z.toFixed(2)}</td>
-          <td style="color:${lbl.color.includes('emerald') ? '#10b981' : lbl.color.includes('green') ? '#22c55e' : lbl.color.includes('blue') ? '#60a5fa' : lbl.color.includes('amber') ? '#f59e0b' : '#ef4444'}">${lbl.text}</td>
+          <td>${lbl.text}</td>
           <td style="color:${flagColor};font-weight:bold;text-align:center">${flag}</td>
           <td style="color:#9ca3af;font-size:12px">${insight}</td>
         </tr>`;
-    }).join('');
+      })
+      .join('');
 
-    const probRows = Object.entries(prediction.probabilities).map(([cls, prob]) => {
-      const isActive = (cls === 'High' && prediction.predicted_class === 0)
-        || (cls === 'Average' && prediction.predicted_class === 1)
-        || (cls === 'Below avg' && prediction.predicted_class === 2)
-        || (cls === 'At-risk' && prediction.predicted_class === 3);
-      return `<td style="text-align:center;${isActive ? 'font-weight:bold;color:#a78bfa' : 'color:#6b7280'}">${cls}<br/>${(prob * 100).toFixed(1)}%${isActive ? ' ✓' : ''}</td>`;
-    }).join('');
+    const probRows = Object.entries(prediction.probabilities)
+      .map(([cls, prob]) => {
+        const isActive =
+          (cls === 'High' && prediction.predicted_class === 0) ||
+          (cls === 'Average' && prediction.predicted_class === 1) ||
+          (cls === 'Below avg' && prediction.predicted_class === 2) ||
+          (cls === 'At-risk' && prediction.predicted_class === 3);
+        return `<td style="text-align:center;${isActive ? 'font-weight:bold;color:#a78bfa' : 'color:#6b7280'}">${cls}<br/>${(prob * 100).toFixed(1)}%${isActive ? ' ✓' : ''}</td>`;
+      })
+      .join('');
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -155,7 +221,7 @@ export function CognitiveReport() {
   <h1>COGNITIVE JOURNEY REPORT</h1>
   <div class="meta">
     Player: <strong>${state.mindlingName}</strong> &nbsp;|&nbsp;
-    Date: ${new Date().toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' })} &nbsp;|&nbsp;
+    Date: ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} &nbsp;|&nbsp;
     Model: NCPT Ensemble v1.0
   </div>
 
@@ -174,7 +240,7 @@ export function CognitiveReport() {
 
   <h2>PERFORMANCE CLASSIFICATION</h2>
   <table>
-    <thead><tr>${Object.keys(prediction.probabilities).map(c => `<th style="text-align:center">${c}</th>`).join('')}</tr></thead>
+    <thead><tr>${Object.keys(prediction.probabilities).map((c) => `<th style="text-align:center">${c}</th>`).join('')}</tr></thead>
     <tbody><tr>${probRows}</tr></tbody>
   </table>
 
@@ -196,352 +262,534 @@ export function CognitiveReport() {
     URL.revokeObjectURL(url);
   };
 
-  const risk = prediction ? riskBadge(prediction.risk_band) : null;
-
   return (
-    <div className="min-h-screen w-full relative overflow-hidden">
-      {/* Background */}
+    <div
+      className="relative w-full min-h-screen overflow-x-hidden"
+      style={{
+        backgroundImage: `url(${heartIsleBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* Dark overlay */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heartIsleBg})` }}
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'linear-gradient(180deg, hsla(232,60%,12%,0.6) 0%, hsla(280,40%,15%,0.55) 50%, hsla(232,60%,12%,0.65) 100%)',
+        }}
       />
-      <div className="absolute inset-0" style={{ background: 'hsla(209, 50%, 15%, 0.6)' }} />
 
-      {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col items-center py-8 px-4">
-        {/* Header */}
+      {/* Scrollable content */}
+      <div className="relative z-10 flex flex-col items-center py-8 px-4 pb-16">
+        {/* ── Header ── */}
         <motion.div
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="text-center mb-8"
+          initial={{ y: -30, scale: 0.95 }}
+          animate={{ y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+          className="mb-6"
         >
-          <h1 className="game-title text-3xl md:text-5xl text-foreground mb-2">
-            COGNITIVE JOURNEY REPORT
-          </h1>
-          <div className="flex items-center justify-center gap-2 text-muted-foreground">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handlePlayAgain}
-              className="flex items-center gap-2 px-4 py-2 rounded-game
-                         bg-card hover:bg-muted transition-colors"
+          <GlassCard
+            tint="lilac"
+            shimmer
+            className="px-8 md:px-14 py-4 md:py-5 text-center"
+            style={{ boxShadow: 'var(--glass-glow-lilac)' }}
+          >
+            <h1
+              className="game-title text-2xl md:text-4xl ink-deep leading-tight mb-1"
+              style={{
+                textShadow:
+                  '0 2px 0 rgba(255,255,255,0.6), 0 6px 16px hsla(282,80%,60%,0.3)',
+              }}
             >
-              <Play className="w-4 h-4" />
-              Play Again
-            </motion.button>
-          </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            Analytics Powered By: GENIE.AI + XAI
-          </p>
+              Cognitive Journey Report
+            </h1>
+            <p
+              className="font-body text-xs ink-soft"
+              style={{ textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}
+            >
+              Analytics Powered By: GENIE.AI + XAI
+            </p>
+          </GlassCard>
         </motion.div>
 
-        {/* Loading State */}
+        {/* ── Loading ── */}
         {loading && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center gap-4 py-20"
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            className="mt-12"
           >
-            <Loader2 className="w-12 h-12 text-primary animate-spin" />
-            <p className="text-lg text-muted-foreground font-display">
-              Analyzing cognitive performance...
-            </p>
+            <GlassCard tint="sky" shimmer className="px-10 py-12 text-center">
+              <Loader2 className="w-12 h-12 ink-deep animate-spin mx-auto mb-4" />
+              <p className="font-display font-bold text-lg ink-deep">
+                Analyzing cognitive performance...
+              </p>
+            </GlassCard>
           </motion.div>
         )}
 
-        {/* Error State */}
+        {/* ── Error ── */}
         {error && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-lg bg-red-500/10 border border-red-500/30 rounded-game p-6 text-center"
+            initial={{ y: 20 }}
+            animate={{ y: 0 }}
+            className="w-full max-w-lg mt-8"
           >
-            <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-            <p className="text-red-400 font-display font-bold mb-2">Assessment Server Unavailable</p>
-            <p className="text-sm text-muted-foreground mb-4">{error}</p>
-            <p className="text-xs text-muted-foreground">
-              Make sure the backend is running: <code className="bg-muted px-2 py-1 rounded">python -m uvicorn main:app --port 8001</code>
-            </p>
+            <GlassCard
+              tint="peach"
+              shimmer
+              className="p-6 text-center"
+              style={{ boxShadow: 'var(--glass-glow-peach)' }}
+            >
+              <AlertTriangle className="w-10 h-10 ink-deep mx-auto mb-3" />
+              <p className="font-display font-bold ink-deep mb-2">
+                Assessment Server Unavailable
+              </p>
+              <p className="text-sm ink-soft mb-4">{error}</p>
+              <p className="text-xs ink-soft">
+                Make sure the backend is running:{' '}
+                <code
+                  className="px-2 py-1 rounded-lg"
+                  style={{
+                    background: 'rgba(255,255,255,0.15)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                  }}
+                >
+                  python -m uvicorn main:app --port 8001
+                </code>
+              </p>
+            </GlassCard>
           </motion.div>
         )}
 
-        {/* Results */}
+        {/* ── Results ── */}
         {prediction && (
           <>
-            <div className="w-full max-w-4xl grid md:grid-cols-2 gap-8">
-              {/* Left side - Profile + Overall Result */}
+            <div className="w-full max-w-4xl grid md:grid-cols-2 gap-6">
+              {/* ── Left: Profile + Overall ── */}
               <motion.div
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="bg-card rounded-game p-6 shadow-float"
+                initial={{ x: -40 }}
+                animate={{ x: 0 }}
+                transition={{ delay: 0.15, type: 'spring', stiffness: 180, damping: 20 }}
               >
-                <h2 className="font-display text-xl font-bold mb-4 text-foreground">
-                  PROFILE SNAPSHOT
-                </h2>
-
-                {/* Garden scene */}
-                <div
-                  className="relative rounded-lg overflow-hidden min-h-[180px]"
-                  style={{
-                    backgroundImage: `url(${heartIsleBg})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    filter: 'brightness(1.2) saturate(1.3)',
-                  }}
+                <GlassCard
+                  tint="lilac"
+                  shimmer
+                  className="p-6 h-full"
+                  style={{ boxShadow: 'var(--glass-glow-lilac)' }}
                 >
+                  <h2
+                    className="font-display font-bold text-lg ink-deep mb-4"
+                    style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
+                  >
+                    Profile Snapshot
+                  </h2>
+
+                  {/* Garden scene */}
                   <div
-                    className="absolute inset-0"
+                    className="relative rounded-2xl overflow-hidden min-h-[180px]"
                     style={{
-                      background: 'radial-gradient(circle at 50% 60%, hsla(45, 100%, 60%, 0.25) 0%, transparent 60%)',
+                      border: '1.5px solid rgba(255,255,255,0.3)',
+                      boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.15)',
                     }}
-                  />
-                  {state.selectedMindling && (
-                    <motion.div
-                      animate={{ y: [0, -5, 0] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center"
-                    >
-                      <svg className="w-10 h-7 mb-[-4px]" viewBox="0 0 40 32" fill="none">
-                        <path d="M4 28L2 8L12 16L20 4L28 16L38 8L36 28Z" fill="hsl(45, 100%, 55%)" stroke="hsl(40, 90%, 45%)" strokeWidth="1.5" />
-                        <circle cx="12" cy="14" r="2" fill="hsl(0, 80%, 60%)" />
-                        <circle cx="20" cy="6" r="2" fill="hsl(210, 80%, 55%)" />
-                        <circle cx="28" cy="14" r="2" fill="hsl(280, 60%, 60%)" />
-                      </svg>
-                      <img
-                        src={mindlingImages[state.selectedMindling.type]}
-                        alt={state.mindlingName}
-                        className="w-20 h-20 object-contain mindling-img"
-                      />
-                      <div
-                        className="w-16 h-3 rounded-[50%] blur-sm -mt-1"
-                        style={{ background: 'radial-gradient(ellipse, hsla(0,0%,0%,0.4) 0%, transparent 70%)' }}
-                      />
-                    </motion.div>
-                  )}
-                  <div className="absolute bottom-3 right-3 flex gap-1.5">
-                    <SeedGem type="spark" size={28} animate={false} />
-                    <SeedGem type="logic" size={28} animate={false} />
-                    <SeedGem type="harmony" size={28} animate={false} />
-                  </div>
-                </div>
-
-                <p className="text-center text-muted-foreground text-sm mt-3">
-                  {state.mindlingName}'s Garden — Journey Complete
-                </p>
-
-                {/* Overall result card */}
-                <div className={`mt-4 p-4 rounded-lg border ${risk!.bg} ${risk!.border}`}>
-                  <div className="flex items-center gap-3 mb-2">
-                    {prediction.risk_band === 'Low' ? (
-                      <ShieldCheck className={`w-8 h-8 ${risk!.text}`} />
-                    ) : (
-                      <ShieldAlert className={`w-8 h-8 ${risk!.text}`} />
+                  >
+                    <img
+                      src={heartIsleBg}
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      style={{ filter: 'brightness(1.2) saturate(1.3)' }}
+                    />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background:
+                          'radial-gradient(circle at 50% 60%, hsla(45, 100%, 60%, 0.25) 0%, transparent 60%)',
+                      }}
+                    />
+                    {state.selectedMindling && (
+                      <motion.div
+                        animate={{ y: [0, -5, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center"
+                      >
+                        <svg
+                          className="w-10 h-7 mb-[-4px]"
+                          viewBox="0 0 40 32"
+                          fill="none"
+                        >
+                          <path
+                            d="M4 28L2 8L12 16L20 4L28 16L38 8L36 28Z"
+                            fill="hsl(45, 100%, 55%)"
+                            stroke="hsl(40, 90%, 45%)"
+                            strokeWidth="1.5"
+                          />
+                          <circle cx="12" cy="14" r="2" fill="hsl(0, 80%, 60%)" />
+                          <circle cx="20" cy="6" r="2" fill="hsl(210, 80%, 55%)" />
+                          <circle cx="28" cy="14" r="2" fill="hsl(280, 60%, 60%)" />
+                        </svg>
+                        <img
+                          src={mindlingImages[state.selectedMindling.type]}
+                          alt={state.mindlingName}
+                          className="w-20 h-20 object-contain"
+                          style={{
+                            filter:
+                              'drop-shadow(0 4px 12px hsla(45,100%,55%,0.4))',
+                          }}
+                        />
+                        <div
+                          className="w-16 h-3 rounded-[50%] blur-sm -mt-1"
+                          style={{
+                            background:
+                              'radial-gradient(ellipse, hsla(0,0%,0%,0.4) 0%, transparent 70%)',
+                          }}
+                        />
+                      </motion.div>
                     )}
-                    <div>
-                      <p className={`font-display font-bold text-lg ${risk!.text}`}>
-                        {prediction.performance_label}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Risk: {prediction.risk_band} | Confidence: {(prediction.confidence * 100).toFixed(1)}%
-                      </p>
+                    <div className="absolute bottom-3 right-3 flex gap-1.5">
+                      <SeedGem type="spark" size={24} animate={false} />
+                      <SeedGem type="logic" size={24} animate={false} />
+                      <SeedGem type="memory" size={24} animate={false} />
+                      <SeedGem type="harmony" size={24} animate={false} />
                     </div>
                   </div>
-                  <p className="text-sm text-foreground/80 mt-2">
-                    {prediction.recommendation}
+
+                  <p
+                    className="text-center font-display font-bold text-sm ink-soft mt-3"
+                    style={{ textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}
+                  >
+                    {state.mindlingName}'s Garden — Journey Complete
                   </p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Mean z-score: {prediction.mean_z_score >= 0 ? '+' : ''}{prediction.mean_z_score.toFixed(2)} vs adult norm
-                  </p>
-                </div>
+
+                  {/* Overall result */}
+                  <div className="mt-4">
+                    <GlassCard
+                      tint={riskTint(prediction.risk_band)}
+                      className="p-4"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        {prediction.risk_band === 'Low' ? (
+                          <ShieldCheck className="w-7 h-7 ink-deep" />
+                        ) : (
+                          <ShieldAlert className="w-7 h-7 ink-deep" />
+                        )}
+                        <div>
+                          <p className="font-display font-bold text-base ink-deep">
+                            {prediction.performance_label}
+                          </p>
+                          <p className="text-xs ink-soft">
+                            Risk: {prediction.risk_band} | Confidence:{' '}
+                            {(prediction.confidence * 100).toFixed(1)}%
+                          </p>
+                        </div>
+                      </div>
+                      <p
+                        className="text-sm ink-deep leading-relaxed mt-2"
+                        style={{ textShadow: '0 1px 0 rgba(255,255,255,0.3)' }}
+                      >
+                        {prediction.recommendation}
+                      </p>
+                      <p className="text-xs ink-soft mt-2">
+                        Mean z-score: {prediction.mean_z_score >= 0 ? '+' : ''}
+                        {prediction.mean_z_score.toFixed(2)} vs adult norm
+                      </p>
+                    </GlassCard>
+                  </div>
+                </GlassCard>
               </motion.div>
 
-              {/* Right side - Domain Z-Scores */}
+              {/* ── Right: Domain Z-Scores ── */}
               <motion.div
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="bg-card rounded-game p-6 shadow-float"
+                initial={{ x: 40 }}
+                animate={{ x: 0 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 180, damping: 20 }}
               >
-                <h2 className="font-display text-xl font-bold mb-4 text-foreground">
-                  COGNITIVE DOMAIN SCORES
-                </h2>
+                <GlassCard
+                  tint="sky"
+                  shimmer
+                  className="p-6 h-full"
+                  style={{ boxShadow: 'var(--glass-glow-sky)' }}
+                >
+                  <h2
+                    className="font-display font-bold text-lg ink-deep mb-4"
+                    style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
+                  >
+                    Cognitive Domain Scores
+                  </h2>
 
-                {Object.entries(prediction.zscores).map(([key, z], i) => {
-                  const meta = DOMAIN_META[key];
-                  if (!meta) return null;
-                  const Icon = meta.icon;
-                  const label = zLabel(z);
-                  return (
-                    <div key={key} className="mb-5">
-                      <div className="flex justify-between items-center mb-1.5">
-                        <div className="flex items-center gap-2">
-                          <Icon className={`w-5 h-5 ${meta.color}`} />
-                          <span className="font-display font-bold text-sm">{meta.label}</span>
+                  {Object.entries(prediction.zscores).map(([key, z], i) => {
+                    const meta = DOMAIN_META[key];
+                    if (!meta) return null;
+                    const Icon = meta.icon;
+                    const label = zLabel(z);
+                    return (
+                      <div key={key} className="mb-5">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <Icon
+                              className="w-4 h-4"
+                              style={{ color: meta.color }}
+                            />
+                            <span
+                              className="font-display font-bold text-sm ink-deep"
+                              style={{
+                                textShadow: '0 1px 0 rgba(255,255,255,0.4)',
+                              }}
+                            >
+                              {meta.label}
+                            </span>
+                          </div>
+                          <span
+                            className="text-xs font-display font-bold px-2 py-0.5 rounded-full"
+                            style={{
+                              background: 'rgba(255,255,255,0.15)',
+                              border: '1px solid rgba(255,255,255,0.25)',
+                              color: meta.color,
+                            }}
+                          >
+                            {label.text}
+                          </span>
                         </div>
-                        <span className={`text-xs font-medium ${label.color}`}>{label.text}</span>
-                      </div>
-                      <div className="h-3.5 bg-muted rounded-full overflow-hidden relative">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${zToPercent(z)}%` }}
-                          transition={{ delay: 0.5 + i * 0.15, duration: 0.8 }}
-                          className={`h-full rounded-full ${barColor(z)}`}
-                        />
-                        {/* Zero line (adult average) */}
+                        {/* Bar */}
                         <div
-                          className="absolute top-0 bottom-0 w-px bg-foreground/30"
-                          style={{ left: '50%' }}
-                        />
+                          className="h-3.5 rounded-full overflow-hidden relative"
+                          style={{
+                            background: 'rgba(255,255,255,0.15)',
+                            border: '1px solid rgba(255,255,255,0.25)',
+                          }}
+                        >
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${zToPercent(z)}%` }}
+                            transition={{ delay: 0.5 + i * 0.12, duration: 0.8 }}
+                            className="h-full rounded-full"
+                            style={{
+                              background: barGradient(z),
+                              boxShadow: `0 0 8px hsla(${meta.hue},60%,50%,0.4)`,
+                            }}
+                          />
+                          {/* Center line (adult average) */}
+                          <div
+                            className="absolute top-0 bottom-0 w-px"
+                            style={{
+                              left: '50%',
+                              background: 'rgba(255,255,255,0.4)',
+                            }}
+                          />
+                        </div>
+                        <p className="text-xs ink-soft mt-1">
+                          z = {z >= 0 ? '+' : ''}
+                          {z.toFixed(2)}
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        z = {z >= 0 ? '+' : ''}{z.toFixed(2)}
-                      </p>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
 
-                <p className="text-xs text-muted-foreground mt-2 border-t border-border pt-3">
-                  Center line = adult average (z=0). Scores to the right indicate stronger performance.
-                </p>
+                  <p
+                    className="text-xs ink-soft mt-2 pt-3"
+                    style={{
+                      borderTop: '1px solid rgba(255,255,255,0.2)',
+                    }}
+                  >
+                    Center line = adult average (z=0). Right = stronger performance.
+                  </p>
+                </GlassCard>
               </motion.div>
             </div>
 
-            {/* Class Probabilities */}
+            {/* ── Classification ── */}
             <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="w-full max-w-4xl mt-8 bg-card rounded-game p-6 shadow-float"
+              initial={{ y: 30 }}
+              animate={{ y: 0 }}
+              transition={{ delay: 0.3, type: 'spring', stiffness: 180, damping: 20 }}
+              className="w-full max-w-4xl mt-6"
             >
-              <h2 className="font-display text-xl font-bold mb-4 text-foreground">
-                PERFORMANCE CLASSIFICATION
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Object.entries(prediction.probabilities).map(([cls, prob]) => {
-                  const isActive = cls === 'High' && prediction.predicted_class === 0
-                    || cls === 'Average' && prediction.predicted_class === 1
-                    || cls === 'Below avg' && prediction.predicted_class === 2
-                    || cls === 'At-risk' && prediction.predicted_class === 3;
-                  const colors: Record<string, string> = {
-                    'High': 'border-emerald-600/50 bg-emerald-600/15',
-                    'Average': 'border-blue-600/50 bg-blue-600/15',
-                    'Below avg': 'border-amber-600/50 bg-amber-500/15',
-                    'At-risk': 'border-red-600/50 bg-red-500/15',
-                  };
-                  const textColors: Record<string, string> = {
-                    'High': 'text-emerald-800',
-                    'Average': 'text-blue-800',
-                    'Below avg': 'text-amber-800',
-                    'At-risk': 'text-red-700',
-                  };
-                  return (
-                    <div
-                      key={cls}
-                      className={`p-4 rounded-lg border-2 text-center transition-all ${
-                        isActive ? colors[cls] + ' scale-105' : 'border-border/30 bg-muted/30 opacity-60'
-                      }`}
-                    >
-                      <p className={`font-display font-bold text-sm ${isActive ? textColors[cls] : 'text-muted-foreground'}`}>
-                        {cls}
-                      </p>
-                      <p className={`text-2xl font-bold mt-1 ${isActive ? textColors[cls] : 'text-muted-foreground'}`}>
-                        {(prob * 100).toFixed(1)}%
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+              <GlassCard
+                tint="butter"
+                shimmer
+                className="p-6"
+                style={{ boxShadow: 'var(--glass-glow-butter)' }}
+              >
+                <h2
+                  className="font-display font-bold text-lg ink-deep mb-4"
+                  style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
+                >
+                  Performance Classification
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {Object.entries(prediction.probabilities).map(([cls, prob]) => {
+                    const isActive =
+                      (cls === 'High' && prediction.predicted_class === 0) ||
+                      (cls === 'Average' && prediction.predicted_class === 1) ||
+                      (cls === 'Below avg' && prediction.predicted_class === 2) ||
+                      (cls === 'At-risk' && prediction.predicted_class === 3);
+                    return (
+                      <GlassCard
+                        key={cls}
+                        tint={isActive ? classTint(cls) : 'bubble'}
+                        shimmer={isActive}
+                        className="p-4 text-center"
+                        style={{
+                          opacity: isActive ? 1 : 0.55,
+                          transform: isActive ? 'scale(1.04)' : 'scale(1)',
+                          transition: 'all 0.3s ease',
+                        }}
+                      >
+                        <p className="font-display font-bold text-sm ink-deep">
+                          {cls}
+                        </p>
+                        <p className="font-display font-bold text-2xl ink-deep mt-1">
+                          {(prob * 100).toFixed(1)}%
+                        </p>
+                        {isActive && (
+                          <span className="text-xs font-display font-bold ink-deep">
+                            Current
+                          </span>
+                        )}
+                      </GlassCard>
+                    );
+                  })}
+                </div>
+              </GlassCard>
             </motion.div>
 
-            {/* XAI Insights */}
+            {/* ── XAI Insights ── */}
             <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="w-full max-w-4xl mt-8 bg-card rounded-game p-6 shadow-float"
+              initial={{ y: 30 }}
+              animate={{ y: 0 }}
+              transition={{ delay: 0.4, type: 'spring', stiffness: 180, damping: 20 }}
+              className="w-full max-w-4xl mt-6"
             >
-              <h2 className="font-display text-xl font-bold mb-4 text-foreground">
-                EXPLAINABLE AI (XAI) INSIGHTS
-              </h2>
+              <GlassCard
+                tint="mint"
+                shimmer
+                className="p-6"
+                style={{ boxShadow: 'var(--glass-glow-mint)' }}
+              >
+                <h2
+                  className="font-display font-bold text-lg ink-deep mb-4"
+                  style={{ textShadow: '0 1px 0 rgba(255,255,255,0.5)' }}
+                >
+                  Explainable AI (XAI) Insights
+                </h2>
 
-              <div className="grid md:grid-cols-3 gap-4">
-                {Object.entries(prediction.zscores).map(([key, z]) => {
-                  const meta = DOMAIN_META[key];
-                  if (!meta) return null;
-                  const Icon = meta.icon;
-                  const flag = z >= -0.5 ? 'OK' : z >= -1.5 ? 'MONITOR' : 'CONCERN';
-                  const flagColor = flag === 'OK' ? 'text-emerald-700' : flag === 'MONITOR' ? 'text-amber-700' : 'text-red-600';
-                  const insight = z >= 0.5
-                    ? `Strong ${meta.label.toLowerCase()} skills. Above adult average.`
-                    : z >= -0.5
-                    ? `${meta.label} is within the normal range. Keep practicing!`
-                    : z >= -1.5
-                    ? `${meta.label} is below average. Targeted practice recommended.`
-                    : `${meta.label} needs attention. Consider focused exercises.`;
-                  return (
-                    <div key={key} className="p-4 bg-muted/50 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <Icon className={`w-5 h-5 ${meta.color}`} />
-                          <span className={`font-display font-bold text-xs ${meta.color}`}>{meta.label}</span>
+                <div className="grid md:grid-cols-3 gap-3">
+                  {Object.entries(prediction.zscores).map(([key, z]) => {
+                    const meta = DOMAIN_META[key];
+                    if (!meta) return null;
+                    const Icon = meta.icon;
+                    const flag =
+                      z >= -0.5 ? 'OK' : z >= -1.5 ? 'MONITOR' : 'CONCERN';
+                    const flagTint: 'mint' | 'butter' | 'peach' =
+                      flag === 'OK' ? 'mint' : flag === 'MONITOR' ? 'butter' : 'peach';
+                    const insight =
+                      z >= 0.5
+                        ? `Strong ${meta.label.toLowerCase()} skills. Above adult average.`
+                        : z >= -0.5
+                          ? `${meta.label} is within the normal range. Keep practicing!`
+                          : z >= -1.5
+                            ? `${meta.label} is below average. Targeted practice recommended.`
+                            : `${meta.label} needs attention. Consider focused exercises.`;
+                    return (
+                      <GlassCard key={key} tint={flagTint} className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Icon
+                              className="w-4 h-4"
+                              style={{ color: meta.color }}
+                            />
+                            <span
+                              className="font-display font-bold text-xs"
+                              style={{ color: meta.color }}
+                            >
+                              {meta.label}
+                            </span>
+                          </div>
+                          <span
+                            className="text-xs font-display font-bold px-1.5 py-0.5 rounded"
+                            style={{
+                              background: 'rgba(255,255,255,0.2)',
+                              border: '1px solid rgba(255,255,255,0.3)',
+                            }}
+                          >
+                            {flag}
+                          </span>
                         </div>
-                        <span className={`text-xs font-bold ${flagColor}`}>[{flag}]</span>
-                      </div>
-                      <p className="text-sm text-foreground/80">{insight}</p>
-                    </div>
-                  );
-                })}
-              </div>
+                        <p
+                          className="text-sm ink-deep leading-relaxed"
+                          style={{
+                            textShadow: '0 1px 0 rgba(255,255,255,0.3)',
+                          }}
+                        >
+                          {insight}
+                        </p>
+                      </GlassCard>
+                    );
+                  })}
+                </div>
+              </GlassCard>
             </motion.div>
           </>
         )}
 
-        {/* Footer */}
+        {/* ── Footer ── */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="mt-8 text-center text-muted-foreground text-sm"
+          initial={{ y: 20 }}
+          animate={{ y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="mt-8 text-center"
         >
-          <p>Report Generated: {new Date().toLocaleDateString()}</p>
-          <p>Player: {state.mindlingName}'s Guardian | NCPT Ensemble Model v1.0</p>
-          <p className="text-xs mt-1">This is a screening tool, not a clinical diagnosis.</p>
+          <p
+            className="text-sm font-display"
+            style={{
+              color: 'rgba(255,255,255,0.6)',
+              textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+            }}
+          >
+            Report Generated: {new Date().toLocaleDateString()} | Player:{' '}
+            {state.mindlingName}'s Guardian
+          </p>
+          <p
+            className="text-xs mt-1"
+            style={{ color: 'rgba(255,255,255,0.45)' }}
+          >
+            This is a screening tool, not a clinical diagnosis.
+          </p>
         </motion.div>
 
-        {/* Action Buttons */}
+        {/* ── Action buttons ── */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2 }}
-          className="mt-8 flex flex-wrap items-center justify-center gap-4"
+          initial={{ y: 20 }}
+          animate={{ y: 0 }}
+          transition={{ delay: 1 }}
+          className="mt-6 flex flex-wrap items-center justify-center gap-4 pb-8"
         >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <GlassButton
+            tint="butter"
+            size="lg"
             onClick={handlePlayAgain}
-            className="flex items-center gap-3 px-8 py-4
-                       bg-gradient-to-b from-primary to-primary/80
-                       text-primary-foreground rounded-game font-display font-bold
-                       text-xl shadow-glow-gold"
+            className="rounded-full"
           >
-            <RotateCcw className="w-6 h-6" />
-            Start New Journey
-          </motion.button>
+            <span className="inline-flex items-center gap-2">
+              <RotateCcw className="w-5 h-5" strokeWidth={2.5} />
+              Start New Journey
+            </span>
+          </GlassButton>
 
           {prediction && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <GlassButton
+              tint="sky"
+              size="lg"
               onClick={handleDownload}
-              className="flex items-center gap-3 px-8 py-4
-                         bg-card hover:bg-muted border-2 border-border hover:border-primary
-                         text-foreground rounded-game font-display font-bold
-                         text-xl transition-all shadow-soft"
+              className="rounded-full"
             >
-              <Download className="w-6 h-6" />
-              Download Report
-            </motion.button>
+              <span className="inline-flex items-center gap-2">
+                <Download className="w-5 h-5" strokeWidth={2.5} />
+                Download Report
+              </span>
+            </GlassButton>
           )}
         </motion.div>
       </div>

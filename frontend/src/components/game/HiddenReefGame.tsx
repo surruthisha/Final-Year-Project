@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { Pause, SkipForward } from 'lucide-react';
+import { Pause, Play, SkipForward } from 'lucide-react';
+import { GlassCard, GlassButton } from '@/components/ui/glass';
+import { SeedGem } from './SeedGem';
 
 import hiddenReefBg from '@/assets/hidden-reef-bg.jpg';
 import pipImage from '@/assets/mindling-pip.png';
@@ -12,7 +14,6 @@ import nuoImage from '@/assets/mindling-nuo.png';
 
 const mindlingImages = { pip: pipImage, mira: miraImage, vee: veeImage, nuo: nuoImage };
 
-// Icon types for the memory bubbles
 type ReefIcon = 'spark' | 'logic' | 'harmony' | 'pip' | 'mira' | 'vee' | 'star' | 'shell';
 
 interface BubbleCard {
@@ -36,7 +37,6 @@ const ROUNDS: RoundConfig[] = [
 
 const ALL_ICONS: ReefIcon[] = ['spark', 'logic', 'harmony', 'pip', 'mira', 'vee', 'star', 'shell'];
 
-// Render an SVG icon for each type (memoized to avoid re-renders)
 const ReefIconSVG = React.memo(function ReefIconSVG({ icon, size = 40 }: { icon: ReefIcon; size?: number }) {
   switch (icon) {
     case 'spark':
@@ -119,7 +119,6 @@ const ReefIconSVG = React.memo(function ReefIconSVG({ icon, size = 40 }: { icon:
   }
 });
 
-// Shared AudioContext for bubble sounds
 let bubbleAudioCtx: AudioContext | null = null;
 
 function getBubbleCtx(): AudioContext {
@@ -167,7 +166,6 @@ function createDeck(pairCount: number): BubbleCard[] {
     cards.push({ id: i * 2, icon, isFlipped: false, isMatched: false });
     cards.push({ id: i * 2 + 1, icon, isFlipped: false, isMatched: false });
   });
-  // Fisher-Yates shuffle
   for (let i = cards.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [cards[i], cards[j]] = [cards[j], cards[i]];
@@ -175,7 +173,6 @@ function createDeck(pairCount: number): BubbleCard[] {
   return cards;
 }
 
-// Pre-generate stable bubble configs so they don't change on re-render
 const BUBBLE_CONFIGS = Array.from({ length: 8 }, (_, i) => ({
   size: 8 + ((i * 7 + 3) % 20),
   left: `${(i * 13 + 5) % 100}%`,
@@ -190,8 +187,15 @@ const BackgroundBubbles = React.memo(function BackgroundBubbles() {
       {BUBBLE_CONFIGS.map((cfg, i) => (
         <motion.div
           key={i}
-          className="absolute rounded-full bg-card/10 border border-card/20"
-          style={{ width: cfg.size, height: cfg.size, left: cfg.left, bottom: -20 }}
+          className="absolute rounded-full"
+          style={{
+            width: cfg.size,
+            height: cfg.size,
+            left: cfg.left,
+            bottom: -20,
+            background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), rgba(255,255,255,0.05))',
+            border: '1px solid rgba(255,255,255,0.15)',
+          }}
           animate={{ y: [0, -1200], x: [0, cfg.xDrift] }}
           transition={{ duration: cfg.duration, repeat: Infinity, delay: cfg.delay, ease: 'linear' }}
         />
@@ -229,7 +233,7 @@ export function HiddenReefGame() {
     setShowRoundIntro(false);
   }, [round]);
 
-  // Shuffle mechanic for round 3 — shuffle after 30s of no match
+  // Shuffle mechanic for round 3
   useEffect(() => {
     if (roundIndex === 2 && !showRoundIntro && !showReward && !isPaused) {
       if (shuffleTimerRef.current) clearTimeout(shuffleTimerRef.current);
@@ -238,8 +242,6 @@ export function HiddenReefGame() {
         setTimeout(() => {
           setCards(prev => {
             const unmatched = prev.filter(c => !c.isMatched);
-            const matched = prev.filter(c => c.isMatched);
-            // Shuffle unmatched positions
             const positions = prev.map((c, i) => (!c.isMatched ? i : -1)).filter(i => i >= 0);
             const shuffled = [...unmatched];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -280,7 +282,6 @@ export function HiddenReefGame() {
 
       const [first, second] = newFlipped;
       if (newCards[first].icon === newCards[second].icon) {
-        // Match!
         playBubblePop(true);
         setMindlingState('happy');
         setTimeout(() => {
@@ -291,7 +292,6 @@ export function HiddenReefGame() {
             const newM = m + 1;
             const totalPairs = (round.cols * round.rows) / 2;
             if (newM >= totalPairs) {
-              // Round complete
               setTimeout(() => handleRoundComplete(), 600);
             }
             return newM;
@@ -301,7 +301,6 @@ export function HiddenReefGame() {
           setMindlingState('idle');
         }, 500);
       } else {
-        // Mismatch
         playBubblePop(false);
         setMindlingState('confused');
         setTimeout(() => {
@@ -342,9 +341,9 @@ export function HiddenReefGame() {
         roundsCompleted: ROUNDS.length,
       },
     });
-    dispatch({ type: 'UNLOCK_ISLAND', island: 'echo-bay' });
-    dispatch({ type: 'SET_CURRENT_ISLAND', island: 'echo-bay' });
-    dispatch({ type: 'SET_SCREEN', screen: 'level-intro' });
+    dispatch({ type: 'COLLECT_SEED', seedType: 'memory' });
+    dispatch({ type: 'COMPLETE_ISLAND', island: 'hidden-reef' });
+    dispatch({ type: 'SET_SCREEN', screen: 'world-map' });
   };
 
   const handleSkip = () => {
@@ -353,12 +352,10 @@ export function HiddenReefGame() {
       statsType: 'hiddenReef',
       stats: { totalMoves: 20, totalPairs: 16, efficiency: 60, roundsCompleted: 3 },
     });
-    dispatch({ type: 'UNLOCK_ISLAND', island: 'echo-bay' });
-    dispatch({ type: 'SET_CURRENT_ISLAND', island: 'echo-bay' });
-    dispatch({ type: 'SET_SCREEN', screen: 'level-intro' });
+    dispatch({ type: 'COLLECT_SEED', seedType: 'memory' });
+    dispatch({ type: 'SET_SCREEN', screen: 'world-map' });
   };
 
-  // Bubble size based on grid (memoized)
   const { bubbleSize, iconSize } = useMemo(() => {
     if (round.cols <= 2) return { bubbleSize: 'w-28 h-28 md:w-32 md:h-32', iconSize: 48 };
     if (round.cols <= 3) return { bubbleSize: 'w-20 h-20 md:w-24 md:h-24', iconSize: 36 };
@@ -366,88 +363,152 @@ export function HiddenReefGame() {
   }, [round.cols]);
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${hiddenReefBg})` }} />
-      <div className="absolute inset-0 bg-gradient-to-b from-[hsla(200,80%,30%,0.3)] via-transparent to-[hsla(220,60%,20%,0.5)]" />
+    <div className="relative h-screen w-full overflow-hidden">
+      {/* ── Background ─────────────────────────────────────── */}
+      <img
+        src={hiddenReefBg}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'linear-gradient(180deg, hsla(200,80%,15%,0.2) 0%, transparent 30%, transparent 70%, hsla(220,60%,10%,0.3) 100%)',
+        }}
+      />
 
-      {/* Animated bubbles background (memoized to prevent re-creation) */}
       <BackgroundBubbles />
 
-      {/* HUD */}
-      <div className="relative z-20 flex justify-between items-center p-4">
-        <div className="flex gap-2 pl-12">
-          <button
+      {/* ── HUD ────────────────────────────────────────────── */}
+      <div className="relative z-20 flex items-start justify-between px-3 md:px-5 pt-3 md:pt-4">
+        {/* Left: spacer */}
+        <div className="flex-1" />
+
+        {/* Center: Pause + Round + Skip */}
+        <motion.div
+          initial={{ y: -20, scale: 0.9 }}
+          animate={{ y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+          className="flex items-center gap-2"
+        >
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => setIsPaused(!isPaused)}
-            className="p-3 rounded-full bg-card/90 shadow-soft hover:shadow-float transition-all"
+            className="glass-button glass-tint-sky w-10 h-10 grid place-items-center ink-deep"
+            aria-label={isPaused ? 'Resume' : 'Pause'}
           >
-            <Pause className="w-6 h-6 text-foreground" />
-          </button>
-          <button
+            {isPaused ? (
+              <Play className="relative z-10 w-4 h-4" strokeWidth={2.5} />
+            ) : (
+              <Pause className="relative z-10 w-4 h-4" strokeWidth={2.5} />
+            )}
+            <span className="specular-sweep" aria-hidden="true" />
+          </motion.button>
+
+          <GlassCard tint="butter" className="px-4 py-2">
+            <span className="font-display font-bold text-base md:text-lg ink-deep tabular-nums">
+              Round {roundIndex + 1}/{ROUNDS.length}
+            </span>
+          </GlassCard>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
             onClick={handleSkip}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-card/90 shadow-soft hover:shadow-float transition-all text-sm font-display"
+            className="glass-button glass-tint-peach h-10 px-3 flex items-center gap-1.5 ink-deep"
           >
-            <SkipForward className="w-4 h-4" /> Skip
-          </button>
-        </div>
+            <SkipForward className="relative z-10 w-3.5 h-3.5" strokeWidth={2.5} />
+            <span className="relative z-10 font-display font-bold text-xs">Skip</span>
+            <span className="specular-sweep" aria-hidden="true" />
+          </motion.button>
+        </motion.div>
 
-        <div className="bg-card/90 px-5 py-2 rounded-game shadow-soft font-display font-bold text-lg">
-          Hidden Reef
-        </div>
-
-        <div className="flex gap-3 items-center">
-          <div className="bg-card/90 px-4 py-2 rounded-game shadow-soft font-display">
-            Round {roundIndex + 1}
-          </div>
-          <div className="bg-card/90 px-4 py-2 rounded-game shadow-soft font-display">
-            Moves: <span className="text-primary font-bold">{moves}</span>
-          </div>
-        </div>
+        {/* Right: Moves + Matches */}
+        <motion.div
+          initial={{ y: -20, scale: 0.9 }}
+          animate={{ y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 18, delay: 0.1 }}
+          className="flex-1 flex justify-end gap-2"
+        >
+          <GlassCard tint="mint" className="px-3 py-2">
+            <span className="font-display font-bold text-sm ink-deep tabular-nums">
+              🫧 {matches}/{(round.cols * round.rows) / 2}
+            </span>
+          </GlassCard>
+          <GlassCard tint="sky" className="px-3 py-2">
+            <span className="font-display font-bold text-sm ink-deep tabular-nums">
+              Moves: {moves}
+            </span>
+          </GlassCard>
+        </motion.div>
       </div>
 
-      {/* Round intro overlay */}
+      {/* ── Round intro overlay ────────────────────────────── */}
       <AnimatePresence>
         {showRoundIntro && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, hsla(200,60%,12%,0.5), hsla(220,70%,8%,0.72))',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+            }}
           >
             <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 200 }}
-              className="bg-card rounded-game p-8 md:p-12 text-center shadow-float max-w-md mx-4"
+              initial={{ scale: 0.85, y: 24 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.85, y: 16 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+              className="w-full max-w-md"
             >
-              <h2 className="game-title text-3xl mb-2">Round {roundIndex + 1}</h2>
-              <p className="text-xl font-display text-primary mb-2">{round.label}</p>
-              <p className="text-foreground/70 mb-2">
-                {round.cols * round.rows / 2} pairs in a {round.cols}×{round.rows} grid
-              </p>
-              {roundIndex === 2 && (
-                <p className="text-accent text-sm font-bold mb-4">
-                  Watch out — bubbles shuffle if you're too slow!
-                </p>
-              )}
-              <p className="text-muted-foreground text-sm mb-6">
-                Find matching pairs by tapping the bubbles!
-              </p>
-              <button
-                onClick={startRound}
-                className="px-8 py-4 bg-gradient-to-b from-primary to-primary/80
-                           text-primary-foreground rounded-game font-display font-bold
-                           text-xl btn-bounce shadow-glow-gold"
+              <GlassCard
+                tint="sky"
+                shimmer
+                className="p-8 md:p-10 text-center"
+                style={{ boxShadow: 'var(--glass-glow-sky)' }}
               >
-                Dive In!
-              </button>
+                <h2
+                  className="game-title text-3xl ink-deep mb-2"
+                  style={{ textShadow: '0 2px 0 rgba(255,255,255,0.55)' }}
+                >
+                  Round {roundIndex + 1}
+                </h2>
+                <p className="font-display font-bold text-lg ink-deep mb-1">{round.label}</p>
+                <p className="font-body text-sm ink-soft mb-2">
+                  {round.cols * round.rows / 2} pairs in a {round.cols}×{round.rows} grid
+                </p>
+                {roundIndex === 2 && (
+                  <GlassCard tint="peach" className="px-4 py-2 mb-3 inline-block rounded-full">
+                    <span className="font-display font-bold text-xs ink-deep">
+                      Watch out — bubbles shuffle if you're too slow!
+                    </span>
+                  </GlassCard>
+                )}
+                <p className="font-body text-sm ink-soft mb-6">
+                  Find matching pairs by tapping the bubbles!
+                </p>
+                <GlassButton
+                  tint="butter"
+                  size="lg"
+                  onClick={startRound}
+                  className="rounded-full"
+                >
+                  Dive In!
+                </GlassButton>
+              </GlassCard>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Game grid */}
+      {/* ── Game grid ──────────────────────────────────────── */}
       {!showRoundIntro && !showReward && (
         <div className="relative z-10 flex justify-center items-center" style={{ minHeight: 'calc(100vh - 120px)' }}>
           <div
@@ -463,8 +524,8 @@ export function HiddenReefGame() {
                 whileTap={!card.isFlipped && !card.isMatched ? { scale: 0.92 } : {}}
                 className={`${bubbleSize} rounded-full relative transition-all duration-300 ${card.isMatched ? 'pointer-events-none' : 'cursor-pointer'}`}
               >
-                {/* Bubble back (unflipped) */}
                 <AnimatePresence mode="wait">
+                  {/* Bubble back (unflipped) */}
                   {!card.isFlipped && !card.isMatched && (
                     <motion.div
                       key="back"
@@ -474,12 +535,15 @@ export function HiddenReefGame() {
                       transition={{ duration: 0.2 }}
                       className="absolute inset-0 rounded-full flex items-center justify-center"
                       style={{
-                        background: 'radial-gradient(ellipse at 35% 25%, hsla(190, 80%, 85%, 0.9) 0%, hsla(200, 70%, 60%, 0.7) 50%, hsla(210, 60%, 45%, 0.8) 100%)',
-                        boxShadow: '0 4px 20px hsla(200, 80%, 50%, 0.3), inset 0 -4px 8px hsla(200, 60%, 40%, 0.3)',
-                        border: '2px solid hsla(200, 80%, 80%, 0.5)',
+                        background:
+                          'linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 50%, hsla(200,70%,60%,0.2) 100%)',
+                        backdropFilter: 'blur(14px) saturate(150%)',
+                        WebkitBackdropFilter: 'blur(14px) saturate(150%)',
+                        border: '2px solid rgba(255,255,255,0.4)',
+                        boxShadow:
+                          'inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 24px -6px hsla(200,60%,20%,0.3)',
                       }}
                     >
-                      {/* Bubble highlight */}
                       <div
                         className="absolute rounded-full"
                         style={{
@@ -487,14 +551,19 @@ export function HiddenReefGame() {
                           left: '20%',
                           width: '35%',
                           height: '25%',
-                          background: 'radial-gradient(ellipse, hsla(0, 0%, 100%, 0.7) 0%, transparent 100%)',
+                          background: 'radial-gradient(ellipse, rgba(255,255,255,0.6) 0%, transparent 100%)',
                         }}
                       />
-                      <span className="text-card/50 text-xl font-bold">?</span>
+                      <span
+                        className="font-display font-bold text-xl"
+                        style={{ color: 'rgba(255,255,255,0.5)' }}
+                      >
+                        ?
+                      </span>
                     </motion.div>
                   )}
 
-                  {/* Bubble front (flipped) */}
+                  {/* Bubble front (flipped / matched) */}
                   {(card.isFlipped || card.isMatched) && (
                     <motion.div
                       key="front"
@@ -502,31 +571,33 @@ export function HiddenReefGame() {
                       animate={{ rotateY: 0, scale: 1 }}
                       exit={{ rotateY: -90 }}
                       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                      className={`absolute inset-0 rounded-full flex items-center justify-center ${card.isMatched ? '' : ''}`}
+                      className="absolute inset-0 rounded-full flex items-center justify-center"
                       style={{
                         background: card.isMatched
-                          ? 'radial-gradient(ellipse at 40% 30%, hsla(45, 100%, 80%, 0.95) 0%, hsla(45, 90%, 55%, 0.85) 100%)'
-                          : 'radial-gradient(ellipse at 35% 25%, hsla(190, 80%, 90%, 0.95) 0%, hsla(200, 70%, 75%, 0.9) 100%)',
-                        boxShadow: card.isMatched
-                          ? '0 0 24px hsla(45, 100%, 55%, 0.6), 0 4px 12px hsla(45, 90%, 40%, 0.3)'
-                          : '0 4px 16px hsla(200, 60%, 50%, 0.3)',
+                          ? 'linear-gradient(135deg, hsla(48,100%,82%,0.7) 0%, hsla(48,90%,60%,0.5) 100%)'
+                          : 'linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 50%, hsla(190,70%,70%,0.3) 100%)',
+                        backdropFilter: 'blur(16px) saturate(170%)',
+                        WebkitBackdropFilter: 'blur(16px) saturate(170%)',
                         border: card.isMatched
-                          ? '2px solid hsla(45, 90%, 60%, 0.8)'
-                          : '2px solid hsla(200, 70%, 80%, 0.6)',
+                          ? '2.5px solid hsla(48,100%,65%,0.9)'
+                          : '2px solid rgba(255,255,255,0.5)',
+                        boxShadow: card.isMatched
+                          ? '0 0 0 2px hsla(48,90%,60%,0.5), 0 0 24px hsla(48,100%,55%,0.5), 0 8px 20px -6px hsla(200,60%,15%,0.3)'
+                          : 'inset 0 1px 0 rgba(255,255,255,0.5), 0 8px 20px -6px hsla(200,60%,15%,0.25)',
                       }}
                     >
-                      {/* Match sparkles */}
                       {card.isMatched && (
                         <>
                           {[0, 1, 2, 3, 4, 5].map(i => (
                             <motion.div
                               key={i}
-                              className="absolute w-1.5 h-1.5 rounded-full bg-primary"
+                              className="absolute w-1.5 h-1.5 rounded-full"
+                              style={{ background: 'hsl(48,100%,65%)' }}
                               initial={{ scale: 0, x: 0, y: 0 }}
                               animate={{
                                 scale: [0, 1, 0],
-                                x: [0, (Math.cos((i / 6) * Math.PI * 2) * 30)],
-                                y: [0, (Math.sin((i / 6) * Math.PI * 2) * 30)],
+                                x: [0, Math.cos((i / 6) * Math.PI * 2) * 30],
+                                y: [0, Math.sin((i / 6) * Math.PI * 2) * 30],
                               }}
                               transition={{ duration: 0.6, delay: i * 0.05 }}
                             />
@@ -543,148 +614,219 @@ export function HiddenReefGame() {
         </div>
       )}
 
-      {/* Shuffle warning */}
+      {/* ── Shuffle warning ────────────────────────────────── */}
       <AnimatePresence>
         {shuffleWarning && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
             className="fixed inset-0 z-40 flex items-center justify-center pointer-events-none"
           >
-            <div className="bg-accent/90 text-accent-foreground px-8 py-4 rounded-game font-display font-bold text-2xl shadow-float">
-              Shuffling bubbles!
-            </div>
+            <GlassCard
+              tint="peach"
+              className="px-8 py-4"
+              style={{ boxShadow: '0 0 28px hsla(18,100%,55%,0.5)' }}
+            >
+              <span className="font-display font-bold text-xl ink-deep">
+                Shuffling bubbles! 🫧
+              </span>
+            </GlassCard>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Mindling */}
+      {/* ── Mindling avatar (bottom-left) ──────────────────── */}
       {state.selectedMindling && !showRoundIntro && (
-        <motion.div
-          animate={
-            mindlingState === 'happy'
-              ? { y: [0, -12, 0], rotate: [0, 8, -8, 0] }
-              : mindlingState === 'confused'
-              ? { x: [-4, 4, -4, 4, 0] }
-              : { y: [0, -3, 0] }
-          }
-          transition={{ duration: mindlingState === 'idle' ? 2 : 0.4, repeat: mindlingState === 'idle' ? Infinity : 0 }}
-          className="fixed bottom-6 left-6 z-20"
-        >
-          <img
-            src={mindlingImages[state.selectedMindling.type]}
-            alt={state.selectedMindling.name}
-            className="w-20 h-20 md:w-24 md:h-24 object-contain mindling-img"
-          />
-          {/* Speech indicator */}
+        <div className="fixed bottom-4 left-4 z-20">
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute -left-14 -top-1 bg-card/90 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-soft"
+            animate={
+              mindlingState === 'happy'
+                ? { y: [0, -14, 0], rotate: [0, 8, -8, 0] }
+                : mindlingState === 'confused'
+                  ? { x: [-4, 4, -4, 4, 0] }
+                  : { y: [0, -4, 0] }
+            }
+            transition={{
+              duration: mindlingState === 'idle' ? 2.5 : 0.4,
+              repeat: mindlingState === 'idle' ? Infinity : 0,
+            }}
+            className="flex flex-col items-center"
           >
-            {mindlingState === 'happy' && (
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 2v8M6 4l4 2M6 8l4-2" stroke="hsl(45, 95%, 55%)" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="6" cy="10" r="1.5" fill="hsl(45, 95%, 55%)"/>
-                <circle cx="10" cy="6" r="1.5" fill="hsl(45, 95%, 55%)"/>
-              </svg>
-            )}
-            {mindlingState === 'confused' && (
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="6" stroke="hsl(210, 80%, 60%)" strokeWidth="1.5" fill="none"/>
-                <text x="8" y="11" textAnchor="middle" fontSize="8" fill="hsl(210, 80%, 60%)" fontWeight="bold">?</text>
-              </svg>
-            )}
-            {mindlingState === 'idle' && (
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="5" cy="8" r="2.5" stroke="hsl(280, 60%, 60%)" strokeWidth="1.5" fill="none"/>
-                <circle cx="11" cy="8" r="2.5" stroke="hsl(280, 60%, 60%)" strokeWidth="1.5" fill="none"/>
-                <circle cx="5" cy="8" r="1" fill="hsl(280, 60%, 60%)"/>
-                <circle cx="11" cy="8" r="1" fill="hsl(280, 60%, 60%)"/>
-              </svg>
-            )}
+            <div
+              className="w-16 h-16 md:w-20 md:h-20 rounded-full grid place-items-center"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 60%, hsla(190,70%,75%,0.25) 100%)',
+                backdropFilter: 'blur(16px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(16px) saturate(160%)',
+                border: '2px solid rgba(255,255,255,0.45)',
+                boxShadow:
+                  mindlingState === 'happy'
+                    ? '0 0 0 2px hsla(48,90%,65%,0.8), 0 0 24px hsla(48,100%,55%,0.5)'
+                    : '0 0 0 2px hsla(190,70%,65%,0.5), 0 0 14px hsla(190,80%,55%,0.25)',
+                transition: 'box-shadow 0.3s ease',
+              }}
+            >
+              <img
+                src={mindlingImages[state.selectedMindling.type]}
+                alt={state.selectedMindling.name}
+                className="w-[80%] h-[80%] object-contain drop-shadow-[0_4px_8px_rgba(80,30,140,0.35)]"
+              />
+            </div>
+            <div
+              className="mt-1 px-2.5 py-0.5 rounded-full"
+              style={{
+                background: 'hsla(190,80%,85%,0.85)',
+                border: '1px solid hsla(190,70%,70%,0.7)',
+              }}
+            >
+              <span className="font-display font-bold text-[10px] ink-deep">
+                {state.mindlingName}
+              </span>
+            </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
 
-      {/* Pause overlay */}
+      {/* ── Pause overlay ──────────────────────────────────── */}
       <AnimatePresence>
         {isPaused && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, hsla(200,60%,12%,0.5), hsla(220,70%,8%,0.72))',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+            }}
+            onClick={() => setIsPaused(false)}
           >
-            <div className="bg-card rounded-game p-8 text-center shadow-float">
-              <h2 className="game-title text-3xl mb-6">PAUSED</h2>
-              <button
-                onClick={() => setIsPaused(false)}
-                className="px-8 py-3 bg-primary text-primary-foreground rounded-game font-display font-bold btn-bounce"
+            <motion.div
+              initial={{ scale: 0.85, y: 24 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.85, y: 16 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <GlassCard
+                tint="sky"
+                shimmer
+                className="px-10 py-8 text-center"
+                style={{ boxShadow: 'var(--glass-glow-sky)' }}
               >
-                Resume
-              </button>
-            </div>
+                <h2
+                  className="game-title text-3xl md:text-4xl ink-deep mb-6"
+                  style={{ textShadow: '0 2px 0 rgba(255,255,255,0.55)' }}
+                >
+                  Paused
+                </h2>
+                <GlassButton
+                  tint="butter"
+                  size="lg"
+                  onClick={() => setIsPaused(false)}
+                  className="rounded-full"
+                >
+                  Resume
+                </GlassButton>
+              </GlassCard>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Reward overlay */}
+      {/* ── Reward overlay ─────────────────────────────────── */}
       <AnimatePresence>
         {showReward && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, hsla(190,60%,12%,0.45), hsla(220,70%,8%,0.7))',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+            }}
           >
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 200 }}
-              className="bg-card rounded-game p-8 md:p-12 text-center shadow-float max-w-md mx-4"
+              initial={{ scale: 0.8, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 22 }}
+              className="w-full max-w-md"
             >
-              <motion.h2
-                className="game-title text-4xl mb-4"
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ repeat: 3, duration: 0.3 }}
+              <GlassCard
+                tint="butter"
+                shimmer
+                className="p-8 md:p-10 text-center"
+                style={{ boxShadow: 'var(--glass-glow-butter)' }}
               >
-                REEF CLEARED!
-              </motion.h2>
-
-              <p className="text-foreground/70 font-display text-lg mb-2">
-                All 3 rounds complete!
-              </p>
-              <p className="text-muted-foreground text-sm mb-6">
-                Total moves: {roundStats.reduce((s, r) => s + r.moves, 0) + moves}
-              </p>
-
-              {state.selectedMindling && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="flex items-center justify-center gap-3 mb-6"
+                <motion.h2
+                  className="game-title text-3xl md:text-4xl ink-deep mb-2"
+                  style={{
+                    textShadow:
+                      '0 2px 0 rgba(255,255,255,0.6), 0 6px 18px hsla(48,100%,50%,0.35)',
+                  }}
+                  animate={{ scale: [1, 1.06, 1] }}
+                  transition={{ repeat: 2, duration: 0.35 }}
                 >
-                  <img
-                    src={mindlingImages[state.selectedMindling.type]}
-                    alt={state.selectedMindling.name}
-                    className="w-16 h-16 object-contain mindling-img"
-                  />
-                  <div className="bg-card border border-border rounded-full px-4 py-2">
-                    <p className="font-medium">Great memory!</p>
-                  </div>
-                </motion.div>
-              )}
+                  Reef Cleared!
+                </motion.h2>
 
-              <button
-                onClick={handleComplete}
-                className="px-8 py-4 bg-gradient-to-b from-primary to-primary/80
-                           text-primary-foreground rounded-game font-display font-bold
-                           text-xl btn-bounce shadow-glow-gold"
-              >
-                Next: Echo Bay →
-              </button>
+                <p className="font-display font-semibold text-sm ink-soft mb-1">
+                  All 3 rounds complete!
+                </p>
+                <p className="font-body text-xs ink-soft mb-4">
+                  Total moves: {roundStats.reduce((s, r) => s + r.moves, 0) + moves}
+                </p>
+
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.3, type: 'spring' }}
+                  className="flex justify-center mb-2"
+                >
+                  <SeedGem type="memory" size={80} animate={true} />
+                </motion.div>
+
+                <GlassCard tint="sky" className="px-4 py-2 mb-5 inline-block">
+                  <span className="font-display font-bold text-sm ink-deep">
+                    🧠 Memory Seed collected! (3/4)
+                  </span>
+                </GlassCard>
+
+                {state.selectedMindling && (
+                  <motion.div
+                    initial={{ y: 16 }}
+                    animate={{ y: 0 }}
+                    transition={{ delay: 0.4, type: 'spring' }}
+                    className="flex items-center justify-center gap-3 mb-6"
+                  >
+                    <img
+                      src={mindlingImages[state.selectedMindling.type]}
+                      alt={state.selectedMindling.name}
+                      className="w-14 h-14 object-contain drop-shadow-[0_6px_12px_rgba(80,30,140,0.4)]"
+                    />
+                    <GlassCard tint="mint" className="px-4 py-2 rounded-2xl">
+                      <p className="font-display font-semibold text-sm ink-deep">
+                        Great memory! 🫧
+                      </p>
+                    </GlassCard>
+                  </motion.div>
+                )}
+
+                <GlassButton
+                  tint="butter"
+                  size="xl"
+                  onClick={handleComplete}
+                  className="rounded-full"
+                >
+                  Next: Echo Bay →
+                </GlassButton>
+              </GlassCard>
             </motion.div>
           </motion.div>
         )}

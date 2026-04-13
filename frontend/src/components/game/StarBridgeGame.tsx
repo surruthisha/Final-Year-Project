@@ -2,7 +2,8 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '@/contexts/GameContext';
 import { useSoundEffects } from '@/hooks/useSoundEffects';
-import { Pause, SkipForward } from 'lucide-react';
+import { Pause, Play, SkipForward } from 'lucide-react';
+import { GlassCard, GlassButton } from '@/components/ui/glass';
 
 import starBridgeBg from '@/assets/star-bridge-bg.jpg';
 import { SeedGem } from './SeedGem';
@@ -32,60 +33,60 @@ const PUZZLES: Puzzle[] = [
     sequence: ['1', 'A', '2', 'B', '3', 'C'],
     instruction: 'Connect: 1 → A → 2 → B → 3 → C',
     nodes: [
-      { id: '1', value: '1', type: 'number', x: 20, y: 25 },
-      { id: 'A', value: 'A', type: 'letter', x: 50, y: 15 },
-      { id: '2', value: '2', type: 'number', x: 80, y: 30 },
-      { id: 'B', value: 'B', type: 'letter', x: 70, y: 55 },
-      { id: '3', value: '3', type: 'number', x: 35, y: 70 },
-      { id: 'C', value: 'C', type: 'letter', x: 55, y: 85 },
+      { id: '1', value: '1', type: 'number', x: 20, y: 32 },
+      { id: 'A', value: 'A', type: 'letter', x: 50, y: 24 },
+      { id: '2', value: '2', type: 'number', x: 80, y: 38 },
+      { id: 'B', value: 'B', type: 'letter', x: 70, y: 58 },
+      { id: '3', value: '3', type: 'number', x: 35, y: 72 },
+      { id: 'C', value: 'C', type: 'letter', x: 55, y: 86 },
     ],
   },
   {
     sequence: ['1', 'A', '2', 'B', '3', 'C', '4', 'D'],
     instruction: 'Connect: 1 → A → 2 → B → 3 → C → 4 → D',
     nodes: [
-      { id: '1', value: '1', type: 'number', x: 15, y: 20 },
-      { id: 'A', value: 'A', type: 'letter', x: 40, y: 10 },
-      { id: '2', value: '2', type: 'number', x: 70, y: 20 },
-      { id: 'B', value: 'B', type: 'letter', x: 85, y: 45 },
-      { id: '3', value: '3', type: 'number', x: 60, y: 60 },
-      { id: 'C', value: 'C', type: 'letter', x: 30, y: 50 },
-      { id: '4', value: '4', type: 'number', x: 20, y: 75 },
-      { id: 'D', value: 'D', type: 'letter', x: 50, y: 85 },
+      { id: '1', value: '1', type: 'number', x: 15, y: 28 },
+      { id: 'A', value: 'A', type: 'letter', x: 40, y: 20 },
+      { id: '2', value: '2', type: 'number', x: 70, y: 28 },
+      { id: 'B', value: 'B', type: 'letter', x: 85, y: 48 },
+      { id: '3', value: '3', type: 'number', x: 60, y: 62 },
+      { id: 'C', value: 'C', type: 'letter', x: 30, y: 54 },
+      { id: '4', value: '4', type: 'number', x: 20, y: 76 },
+      { id: 'D', value: 'D', type: 'letter', x: 50, y: 87 },
     ],
   },
   {
     sequence: ['1', 'A', '2', 'B', '3', 'C', '4', 'D', '5', 'E'],
     instruction: 'Connect: 1 → A → 2 → B → 3 → C → 4 → D → 5 → E',
     nodes: [
-      { id: '1', value: '1', type: 'number', x: 10, y: 15 },
-      { id: 'A', value: 'A', type: 'letter', x: 35, y: 10 },
-      { id: '2', value: '2', type: 'number', x: 60, y: 18 },
-      { id: 'B', value: 'B', type: 'letter', x: 85, y: 25 },
-      { id: '3', value: '3', type: 'number', x: 75, y: 50 },
-      { id: 'C', value: 'C', type: 'letter', x: 50, y: 40 },
-      { id: '4', value: '4', type: 'number', x: 25, y: 55 },
-      { id: 'D', value: 'D', type: 'letter', x: 15, y: 80 },
-      { id: '5', value: '5', type: 'number', x: 45, y: 75 },
-      { id: 'E', value: 'E', type: 'letter', x: 70, y: 82 },
+      { id: '1', value: '1', type: 'number', x: 10, y: 24 },
+      { id: 'A', value: 'A', type: 'letter', x: 35, y: 20 },
+      { id: '2', value: '2', type: 'number', x: 60, y: 26 },
+      { id: 'B', value: 'B', type: 'letter', x: 85, y: 33 },
+      { id: '3', value: '3', type: 'number', x: 75, y: 52 },
+      { id: 'C', value: 'C', type: 'letter', x: 50, y: 45 },
+      { id: '4', value: '4', type: 'number', x: 25, y: 58 },
+      { id: 'D', value: 'D', type: 'letter', x: 15, y: 78 },
+      { id: '5', value: '5', type: 'number', x: 45, y: 76 },
+      { id: 'E', value: 'E', type: 'letter', x: 70, y: 84 },
     ],
   },
   {
     sequence: ['1', 'A', '2', 'B', '3', 'C', '4', 'D', '5', 'E', '6', 'F'],
     instruction: 'Connect: 1→A→2→B→3→C→4→D→5→E→6→F',
     nodes: [
-      { id: '1', value: '1', type: 'number', x: 12, y: 12 },
-      { id: 'A', value: 'A', type: 'letter', x: 30, y: 8 },
-      { id: '2', value: '2', type: 'number', x: 55, y: 15 },
-      { id: 'B', value: 'B', type: 'letter', x: 80, y: 12 },
-      { id: '3', value: '3', type: 'number', x: 88, y: 35 },
-      { id: 'C', value: 'C', type: 'letter', x: 70, y: 48 },
-      { id: '4', value: '4', type: 'number', x: 45, y: 42 },
-      { id: 'D', value: 'D', type: 'letter', x: 20, y: 50 },
-      { id: '5', value: '5', type: 'number', x: 15, y: 72 },
-      { id: 'E', value: 'E', type: 'letter', x: 40, y: 80 },
-      { id: '6', value: '6', type: 'number', x: 65, y: 75 },
-      { id: 'F', value: 'F', type: 'letter', x: 85, y: 82 },
+      { id: '1', value: '1', type: 'number', x: 12, y: 22 },
+      { id: 'A', value: 'A', type: 'letter', x: 30, y: 18 },
+      { id: '2', value: '2', type: 'number', x: 55, y: 24 },
+      { id: 'B', value: 'B', type: 'letter', x: 80, y: 22 },
+      { id: '3', value: '3', type: 'number', x: 88, y: 40 },
+      { id: 'C', value: 'C', type: 'letter', x: 70, y: 52 },
+      { id: '4', value: '4', type: 'number', x: 45, y: 47 },
+      { id: 'D', value: 'D', type: 'letter', x: 20, y: 55 },
+      { id: '5', value: '5', type: 'number', x: 15, y: 74 },
+      { id: 'E', value: 'E', type: 'letter', x: 40, y: 82 },
+      { id: '6', value: '6', type: 'number', x: 65, y: 77 },
+      { id: 'F', value: 'F', type: 'letter', x: 85, y: 84 },
     ],
   },
 ];
@@ -192,6 +193,7 @@ export function StarBridgeGame() {
       stats: { totalTime, errors: totalErrors, completed: true },
     });
     dispatch({ type: 'COLLECT_SEED', seedType: 'logic' });
+    dispatch({ type: 'COMPLETE_ISLAND', island: 'star-bridge' });
     dispatch({ type: 'SET_SCREEN', screen: 'world-map' });
   };
 
@@ -216,48 +218,116 @@ export function StarBridgeGame() {
     setShowRoundComplete(false);
   };
 
-  const getNodeColor = (nodeId: string) => {
-    const isCurrent = currentNode === nodeId;
-    const isConnected = connections.includes(nodeId);
-    if (isCurrent) return 'bg-primary shadow-glow-gold';
-    if (isConnected) return 'bg-seed-logic shadow-glow-blue';
-    return 'bg-card hover:bg-muted';
-  };
+  const isErrorDanger = errors >= MAX_ERRORS - 1;
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden">
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${starBridgeBg})` }} />
+    <div className="relative h-screen w-full overflow-hidden">
+      {/* ── Background ─────────────────────────────────────── */}
+      <img
+        src={starBridgeBg}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+      />
 
-      {/* HUD */}
-      <div className="relative z-20 flex justify-between items-center p-4">
-        <div className="flex gap-2 pl-12">
-          <button onClick={() => setIsPaused(!isPaused)} className="p-3 rounded-full bg-card/90 shadow-soft hover:shadow-float transition-all">
-            <Pause className="w-6 h-6 text-foreground" />
-          </button>
-          <button onClick={handleSkip} className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-card/90 shadow-soft hover:shadow-float transition-all text-sm font-display">
-            <SkipForward className="w-4 h-4" /> Skip
-          </button>
-        </div>
-        <div className="flex gap-4 items-center">
-          <div className="bg-card/90 px-4 py-2 rounded-game shadow-soft font-display">
-            ROUND: {round + 1}/{TOTAL_ROUNDS}
-          </div>
-          <div className="bg-card/90 px-4 py-2 rounded-game shadow-soft font-display">
-            SIGNAL: {connections.length}/{currentPuzzle.sequence.length}
-          </div>
-          <div className={`bg-card/90 px-4 py-2 rounded-game shadow-soft font-display ${errors >= MAX_ERRORS - 1 ? 'text-destructive' : ''}`}>
-            ERRORS: {errors}/{MAX_ERRORS}
-          </div>
-        </div>
+      {/* ── HUD ────────────────────────────────────────────── */}
+      <div className="relative z-20 flex items-start justify-between px-3 md:px-5 pt-3 md:pt-4">
+        {/* Left: spacer */}
+        <div className="flex-1" />
+
+        {/* Center: Pause + Round + Skip */}
+        <motion.div
+          initial={{ y: -20, scale: 0.9 }}
+          animate={{ y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+          className="flex items-center gap-2"
+        >
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsPaused(!isPaused)}
+            className="glass-button glass-tint-sky w-10 h-10 grid place-items-center ink-deep"
+            aria-label={isPaused ? 'Resume' : 'Pause'}
+          >
+            {isPaused ? (
+              <Play className="relative z-10 w-4 h-4" strokeWidth={2.5} />
+            ) : (
+              <Pause className="relative z-10 w-4 h-4" strokeWidth={2.5} />
+            )}
+            <span className="specular-sweep" aria-hidden="true" />
+          </motion.button>
+
+          <GlassCard tint="butter" className="px-4 py-2">
+            <span className="font-display font-bold text-base md:text-lg ink-deep tabular-nums">
+              Round {round + 1}/{TOTAL_ROUNDS}
+            </span>
+          </GlassCard>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={handleSkip}
+            className="glass-button glass-tint-peach h-10 px-3 flex items-center gap-1.5 ink-deep"
+          >
+            <SkipForward className="relative z-10 w-3.5 h-3.5" strokeWidth={2.5} />
+            <span className="relative z-10 font-display font-bold text-xs">Skip</span>
+            <span className="specular-sweep" aria-hidden="true" />
+          </motion.button>
+        </motion.div>
+
+        {/* Right: Signal + Errors */}
+        <motion.div
+          initial={{ y: -20, scale: 0.9 }}
+          animate={{ y: 0, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 18, delay: 0.1 }}
+          className="flex-1 flex justify-end gap-2"
+        >
+          <GlassCard tint="mint" className="px-3 py-2">
+            <span className="font-display font-bold text-sm ink-deep tabular-nums">
+              ⭐ {connections.length}/{currentPuzzle.sequence.length}
+            </span>
+          </GlassCard>
+
+          <GlassCard
+            tint={isErrorDanger ? 'peach' : 'sky'}
+            className="px-3 py-2"
+            style={{
+              boxShadow: isErrorDanger
+                ? '0 0 16px hsla(0,80%,60%,0.4)'
+                : undefined,
+              transition: 'box-shadow 0.4s ease',
+            }}
+          >
+            <span
+              className="font-display font-bold text-sm tabular-nums"
+              style={{
+                color: isErrorDanger ? 'hsl(0,65%,45%)' : undefined,
+                transition: 'color 0.4s ease',
+              }}
+            >
+              ✗ {errors}/{MAX_ERRORS}
+            </span>
+          </GlassCard>
+        </motion.div>
       </div>
 
-      {/* Instructions */}
-      <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} key={round} className="relative z-10 text-center py-2">
-        <p className="text-card font-display text-lg drop-shadow-lg">{currentPuzzle.instruction}</p>
+      {/* ── Instruction bar ────────────────────────────────── */}
+      <motion.div
+        initial={{ y: -20, scale: 0.94 }}
+        animate={{ y: 0, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 18, delay: 0.15 }}
+        key={round}
+        className="relative z-20 flex justify-center mt-2"
+      >
+        <GlassCard tint="lilac" className="px-5 py-2 rounded-full">
+          <p className="font-display font-semibold text-sm md:text-base ink-deep tracking-wide">
+            {currentPuzzle.instruction}
+          </p>
+        </GlassCard>
       </motion.div>
 
-      {/* Game area */}
-      <div className="relative z-10 w-full h-[calc(100vh-160px)]">
+      {/* ── Game area ──────────────────────────────────────── */}
+      <div className="absolute inset-0 z-10">
         {/* Connection lines */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none">
           <defs>
@@ -281,67 +351,104 @@ export function StarBridgeGame() {
             if (!prevNode || !currNode) return null;
             return (
               <g key={`${prevNode.id}-${currNode.id}`}>
-                {/* Glow underlay */}
                 <motion.line
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: 0.4 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
                   x1={`${prevNode.x}%`} y1={`${prevNode.y}%`}
                   x2={`${currNode.x}%`} y2={`${currNode.y}%`}
                   stroke="hsl(210 80% 60%)" strokeWidth="10"
-                  strokeLinecap="round"
-                  filter="url(#bridgeGlow)"
+                  strokeLinecap="round" filter="url(#bridgeGlow)"
                 />
-                {/* Main dotted bridge line */}
                 <motion.line
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
                   x1={`${prevNode.x}%`} y1={`${prevNode.y}%`}
                   x2={`${currNode.x}%`} y2={`${currNode.y}%`}
                   stroke="url(#bridgeGradient)" strokeWidth="4"
-                  strokeDasharray="8,4"
-                  strokeLinecap="round"
+                  strokeDasharray="8,4" strokeLinecap="round"
                 />
-                {/* Bright center line */}
                 <motion.line
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: [0.6, 1, 0.6] }}
-                  transition={{ pathLength: { duration: 0.4, ease: "easeOut" }, opacity: { duration: 1.5, repeat: Infinity } }}
+                  transition={{
+                    pathLength: { duration: 0.4, ease: 'easeOut' },
+                    opacity: { duration: 1.5, repeat: Infinity },
+                  }}
                   x1={`${prevNode.x}%`} y1={`${prevNode.y}%`}
                   x2={`${currNode.x}%`} y2={`${currNode.y}%`}
                   stroke="hsl(0 0% 100%)" strokeWidth="1.5"
-                  strokeDasharray="8,4"
-                  strokeLinecap="round"
+                  strokeDasharray="8,4" strokeLinecap="round"
                 />
               </g>
             );
           })}
         </svg>
 
-        {/* Nodes */}
+        {/* Star nodes */}
         <AnimatePresence mode="wait">
           <motion.div key={round} className="absolute inset-0">
             {currentPuzzle.nodes.map((node, index) => {
+              const isCurrent = currentNode === node.id;
               const isConnected = connections.includes(node.id);
+              const isNumber = node.type === 'number';
+              const hue = isNumber ? 48 : 230;
+
               return (
                 <div
                   key={node.id}
-                  style={{ position: 'absolute', left: `${node.x}%`, top: `${node.y}%` }}
-                  className="-translate-x-1/2 -translate-y-1/2"
+                  className="absolute"
+                  style={{
+                    left: `${node.x}%`,
+                    top: `${node.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
                 >
                   <motion.button
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ delay: index * 0.05, type: "spring" }}
+                    transition={{ delay: index * 0.05, type: 'spring', stiffness: 260, damping: 20 }}
                     onClick={() => handleNodeClick(node.id)}
-                    className={`
-                      w-14 h-14 md:w-18 md:h-18 rounded-full flex items-center justify-center
-                      font-display font-bold text-xl md:text-2xl
-                      border-4 border-card/50 transition-all duration-300
-                      ${getNodeColor(node.id)} ${isConnected ? 'text-card' : 'text-foreground'}`}
+                    whileHover={{ scale: 1.15, y: -3 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="w-12 h-12 md:w-16 md:h-16 rounded-full grid place-items-center cursor-pointer"
+                    style={{
+                      background: isCurrent
+                        ? `linear-gradient(135deg, hsla(48,100%,80%,0.7) 0%, hsla(48,100%,60%,0.5) 100%)`
+                        : isConnected
+                          ? `linear-gradient(135deg, hsla(${hue},80%,75%,0.55) 0%, hsla(${hue},70%,55%,0.35) 100%)`
+                          : `linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 100%)`,
+                      backdropFilter: 'blur(14px) saturate(160%)',
+                      WebkitBackdropFilter: 'blur(14px) saturate(160%)',
+                      border: isCurrent
+                        ? '2.5px solid hsla(48,100%,70%,0.9)'
+                        : isConnected
+                          ? `2px solid hsla(${hue},70%,65%,0.7)`
+                          : '2px solid rgba(255,255,255,0.4)',
+                      boxShadow: isCurrent
+                        ? '0 0 0 3px hsla(48,100%,65%,0.6), 0 0 28px hsla(48,100%,55%,0.5), 0 8px 20px -6px hsla(232,60%,10%,0.3)'
+                        : isConnected
+                          ? `0 0 18px hsla(${hue},80%,55%,0.4), 0 6px 16px -6px hsla(232,60%,10%,0.3)`
+                          : 'inset 0 1px 0 rgba(255,255,255,0.4), 0 6px 16px -6px hsla(232,60%,10%,0.25)',
+                      transition: 'box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease',
+                    }}
                   >
-                    {node.value}
+                    <span
+                      className="font-display font-bold text-lg md:text-xl"
+                      style={{
+                        color: isCurrent
+                          ? 'hsl(30,60%,18%)'
+                          : isConnected
+                            ? 'hsl(0,0%,100%)'
+                            : 'hsl(0,0%,95%)',
+                        textShadow: isCurrent
+                          ? '0 1px 0 rgba(255,255,255,0.5)'
+                          : '0 1px 3px rgba(0,0,0,0.4)',
+                      }}
+                    >
+                      {node.value}
+                    </span>
                   </motion.button>
                 </div>
               );
@@ -352,116 +459,326 @@ export function StarBridgeGame() {
         {/* Error indicator */}
         <AnimatePresence>
           {showError && (
-            <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1, x: [-10, 10, -10, 10, 0] }} exit={{ opacity: 0 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-destructive text-destructive-foreground px-6 py-3 rounded-game font-display text-xl z-30">
-              Wrong! ✗
+            <motion.div
+              initial={{ scale: 0.5 }}
+              animate={{ scale: 1, x: [-8, 8, -8, 8, 0] }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              className="fixed top-1/2 left-1/2 z-30"
+              style={{ transform: 'translate(-50%, -50%)' }}
+            >
+              <GlassCard
+                tint="peach"
+                className="px-6 py-3"
+                style={{ boxShadow: '0 0 24px hsla(0,80%,55%,0.5)' }}
+              >
+                <span className="font-display font-bold text-lg ink-deep">
+                  Wrong! ✗
+                </span>
+              </GlassCard>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Mindling */}
-        {state.selectedMindling && (
-          <motion.div
-            animate={mindlingState === 'happy' ? { y: [0, -20, 0] } : mindlingState === 'sad' ? { x: [-5, 5, -5, 5, 0] } : { y: [0, -5, 0] }}
-            transition={{ duration: mindlingState === 'idle' ? 2 : 0.3, repeat: mindlingState === 'idle' ? Infinity : 0 }}
-            className="fixed bottom-8 left-8 z-20"
-          >
-            <img src={mindlingImages[state.selectedMindling.type]} alt={state.selectedMindling.name} 
-              className="w-24 h-24 object-contain mindling-img" />
-          </motion.div>
-        )}
       </div>
 
-      {/* Round Complete overlay */}
+      {/* ── Mindling avatar (bottom-left) ──────────────────── */}
+      {state.selectedMindling && (
+        <div className="fixed bottom-4 left-4 z-20">
+          <motion.div
+            animate={
+              mindlingState === 'happy'
+                ? { y: [0, -20, 0] }
+                : mindlingState === 'sad'
+                  ? { x: [-4, 4, -4, 4, 0] }
+                  : { y: [0, -4, 0] }
+            }
+            transition={{
+              duration: mindlingState === 'idle' ? 2.5 : 0.3,
+              repeat: mindlingState === 'idle' ? Infinity : 0,
+            }}
+            className="flex flex-col items-center"
+          >
+            <div
+              className="w-16 h-16 md:w-20 md:h-20 rounded-full grid place-items-center"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 60%, hsla(230,80%,80%,0.25) 100%)',
+                backdropFilter: 'blur(16px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(16px) saturate(160%)',
+                border: '2px solid rgba(255,255,255,0.45)',
+                boxShadow:
+                  mindlingState === 'happy'
+                    ? '0 0 0 2px hsla(48,90%,65%,0.8), 0 0 24px hsla(48,100%,55%,0.5)'
+                    : '0 0 0 2px hsla(230,70%,65%,0.5), 0 0 14px hsla(230,80%,55%,0.25)',
+                transition: 'box-shadow 0.3s ease',
+              }}
+            >
+              <img
+                src={mindlingImages[state.selectedMindling.type]}
+                alt={state.selectedMindling.name}
+                className="w-[80%] h-[80%] object-contain drop-shadow-[0_4px_8px_rgba(80,30,140,0.35)]"
+              />
+            </div>
+            <div
+              className="mt-1 px-2.5 py-0.5 rounded-full"
+              style={{
+                background: 'hsla(230,80%,85%,0.85)',
+                border: '1px solid hsla(230,70%,70%,0.7)',
+              }}
+            >
+              <span className="font-display font-bold text-[10px] ink-deep">
+                {state.mindlingName}
+              </span>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* ── Round Complete overlay ──────────────────────────── */}
       <AnimatePresence>
         {showRoundComplete && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center">
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}
-              className="bg-card rounded-game p-8 md:p-10 text-center shadow-float max-w-sm mx-4">
-              <motion.h2 className="game-title text-3xl mb-2" animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: 2, duration: 0.3 }}>
-                Round {round + 1} Clear!
-              </motion.h2>
-              <p className="font-display text-lg text-muted-foreground mb-6">
-                {TOTAL_ROUNDS - round - 1} more to go!
-              </p>
-              <button onClick={handleNextRound}
-                className="px-8 py-4 bg-gradient-to-b from-primary to-primary/80 text-primary-foreground rounded-game font-display font-bold text-xl btn-bounce shadow-glow-gold">
-                Next Round →
-              </button>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, hsla(250,60%,15%,0.5), hsla(232,70%,8%,0.72))',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 24 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+            >
+              <GlassCard
+                tint="lilac"
+                shimmer
+                className="px-10 py-8 text-center"
+                style={{ boxShadow: 'var(--glass-glow-lilac)' }}
+              >
+                <motion.h2
+                  className="game-title text-3xl ink-deep mb-2"
+                  style={{ textShadow: '0 2px 0 rgba(255,255,255,0.55)' }}
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ repeat: 2, duration: 0.3 }}
+                >
+                  Round {round + 1} Clear!
+                </motion.h2>
+                <p className="font-display font-semibold text-sm ink-soft mb-6">
+                  {TOTAL_ROUNDS - round - 1} more to go!
+                </p>
+                <GlassButton
+                  tint="butter"
+                  size="lg"
+                  onClick={handleNextRound}
+                  className="rounded-full"
+                >
+                  Next Round →
+                </GlassButton>
+              </GlassCard>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Pause overlay */}
+      {/* ── Pause overlay ──────────────────────────────────── */}
       <AnimatePresence>
-        {isPaused && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center">
-            <div className="bg-card rounded-game p-8 text-center shadow-float">
-              <h2 className="game-title text-3xl mb-6">PAUSED</h2>
-              <button onClick={() => setIsPaused(false)}
-                className="px-8 py-3 bg-primary text-primary-foreground rounded-game font-display font-bold btn-bounce">
-                Resume
-              </button>
-            </div>
+        {isPaused && !gameOver && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, hsla(232,60%,15%,0.5), hsla(232,70%,8%,0.72))',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+            }}
+            onClick={() => setIsPaused(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 24 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.85, y: 16 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <GlassCard
+                tint="lilac"
+                shimmer
+                className="px-10 py-8 text-center"
+                style={{ boxShadow: 'var(--glass-glow-lilac)' }}
+              >
+                <h2
+                  className="game-title text-3xl md:text-4xl ink-deep mb-6"
+                  style={{ textShadow: '0 2px 0 rgba(255,255,255,0.55)' }}
+                >
+                  Paused
+                </h2>
+                <GlassButton
+                  tint="butter"
+                  size="lg"
+                  onClick={() => setIsPaused(false)}
+                  className="rounded-full"
+                >
+                  Resume
+                </GlassButton>
+              </GlassCard>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Final Reward overlay */}
+      {/* ── Reward overlay ─────────────────────────────────── */}
       <AnimatePresence>
         {showReward && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center">
-            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}
-              className="bg-card rounded-game p-8 md:p-12 text-center shadow-float max-w-md mx-4">
-              <motion.h2 className="game-title text-4xl mb-4" animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: 3, duration: 0.3 }}>
-                LEVEL COMPLETE!
-              </motion.h2>
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }}
-                transition={{ delay: 0.3, type: "spring" }} className="mx-auto my-6 flex justify-center">
-                <SeedGem type="logic" size={96} animate={true} />
-              </motion.div>
-              {state.selectedMindling && (
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                  className="flex items-center justify-center gap-3 mb-6">
-                  <img src={mindlingImages[state.selectedMindling.type]} alt={state.selectedMindling.name} className="w-16 h-16 mindling-img" />
-                  <div className="bg-card border border-border rounded-bubble px-4 py-2">
-                    <p className="font-medium">All bridges connected!</p>
-                  </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, hsla(230,60%,15%,0.45), hsla(232,70%,8%,0.7))',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 22 }}
+              className="w-full max-w-md"
+            >
+              <GlassCard
+                tint="butter"
+                shimmer
+                className="p-8 md:p-10 text-center"
+                style={{ boxShadow: 'var(--glass-glow-butter)' }}
+              >
+                <motion.h2
+                  className="game-title text-3xl md:text-4xl ink-deep mb-2"
+                  style={{
+                    textShadow:
+                      '0 2px 0 rgba(255,255,255,0.6), 0 6px 18px hsla(48,100%,50%,0.35)',
+                  }}
+                  animate={{ scale: [1, 1.06, 1] }}
+                  transition={{ repeat: 2, duration: 0.35 }}
+                >
+                  Level Complete!
+                </motion.h2>
+
+                <p className="font-display font-semibold text-sm ink-soft mb-5">
+                  All star bridges connected!
+                </p>
+
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 16 }}
+                  className="flex justify-center mb-5"
+                >
+                  <SeedGem type="logic" size={80} animate />
                 </motion.div>
-              )}
-              <button onClick={handleComplete}
-                className="px-8 py-4 bg-gradient-to-b from-primary to-primary/80 text-primary-foreground rounded-game font-display font-bold text-xl btn-bounce shadow-glow-gold">
-                Next Level →
-              </button>
+
+                <GlassCard tint="sky" className="px-4 py-2 mb-5 inline-block">
+                  <span className="font-display font-bold text-sm ink-deep">
+                    💎 Logic Seed collected! (2/4)
+                  </span>
+                </GlassCard>
+
+                {state.selectedMindling && (
+                  <motion.div
+                    initial={{ y: 16 }}
+                    animate={{ y: 0 }}
+                    transition={{ delay: 0.5, type: 'spring' }}
+                    className="flex items-center justify-center gap-3 mb-6"
+                  >
+                    <img
+                      src={mindlingImages[state.selectedMindling.type]}
+                      alt={state.selectedMindling.name}
+                      className="w-14 h-14 object-contain drop-shadow-[0_6px_12px_rgba(80,30,140,0.4)]"
+                    />
+                    <GlassCard tint="mint" className="px-4 py-2 rounded-2xl">
+                      <p className="font-display font-semibold text-sm ink-deep">
+                        All bridges connected! ✨
+                      </p>
+                    </GlassCard>
+                  </motion.div>
+                )}
+
+                <GlassButton
+                  tint="butter"
+                  size="xl"
+                  onClick={handleComplete}
+                  className="rounded-full"
+                >
+                  Next Level →
+                </GlassButton>
+              </GlassCard>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Game Over (failed) */}
+      {/* ── Game Over (failed) ─────────────────────────────── */}
       <AnimatePresence>
         {gameOver && !showReward && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="fixed inset-0 z-50 bg-[hsla(209,50%,15%,0.6)] flex items-center justify-center">
-            <div className="bg-card rounded-game p-8 text-center shadow-float">
-              <h2 className="game-title text-3xl mb-4">Too Many Errors!</h2>
-              <p className="text-lg mb-6">Let's try again!</p>
-              <div className="flex gap-4 justify-center">
-                <button onClick={resetGame}
-                  className="px-6 py-3 bg-primary text-primary-foreground rounded-game font-display font-bold btn-bounce">
-                  Try Again
-                </button>
-                <button onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'world-map' })}
-                  className="px-6 py-3 border-2 border-border rounded-game font-display btn-bounce">
-                  Back to Map
-                </button>
-              </div>
-            </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, hsla(232,60%,15%,0.5), hsla(232,70%,8%,0.72))',
+              backdropFilter: 'blur(14px)',
+              WebkitBackdropFilter: 'blur(14px)',
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 24 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+              className="w-full max-w-sm"
+            >
+              <GlassCard
+                tint="lilac"
+                shimmer
+                className="p-8 text-center"
+                style={{ boxShadow: 'var(--glass-glow-lilac)' }}
+              >
+                <h2
+                  className="game-title text-3xl ink-deep mb-2"
+                  style={{ textShadow: '0 1px 0 rgba(255,255,255,0.55)' }}
+                >
+                  Too Many Errors!
+                </h2>
+                <p className="font-body text-base ink-soft mb-6">
+                  Let's try again!
+                </p>
+                <div className="flex gap-3 justify-center">
+                  <GlassButton
+                    tint="butter"
+                    size="lg"
+                    onClick={resetGame}
+                    className="rounded-full"
+                  >
+                    Try Again
+                  </GlassButton>
+                  <GlassButton
+                    tint="sky"
+                    size="lg"
+                    onClick={() => dispatch({ type: 'SET_SCREEN', screen: 'world-map' })}
+                    className="rounded-full"
+                  >
+                    Back to Map
+                  </GlassButton>
+                </div>
+              </GlassCard>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
